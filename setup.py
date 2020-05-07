@@ -12,8 +12,10 @@ setup(name="sampleproject",
       packages=find_packages(exclude=['tests', '*.tests', '*.tests.*']),
       # test_suite='tests',
       # Include scripts/executables for application from 'scripts' directory
-      # scripts=['scripts/entrypoint'],
+      scripts=['scripts/sampleproject'],
       # Generate start script automatically
+      # Attention: the generic name of the executable 'entrypoint' is used as
+      # an entry point in Docker (see Dockerfile).
       entry_points={'console_scripts':
                     ['entrypoint=sampleproject.sample:main']},
       setup_requires=['wheel'],
@@ -50,7 +52,7 @@ setup(name="sampleproject",
       #     "Source Code": "https://code.example.com/HelloWorld/",
       # },
       platforms=['any'],
-      license='None',
+      license='MIT',
       classifiers=["Programming Language :: Python :: 3",
                    "License :: OSI Approved :: MIT License",
                    #  "License :: Other/Proprietary License",

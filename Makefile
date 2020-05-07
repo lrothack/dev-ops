@@ -52,6 +52,11 @@ bdist_wheel:
 install_dev:
 	pip install -r requirements.txt
 
+## test:         Run Python unit tests with nosetests
+test:
+	nosetests --where $(TESTS)
+
+
 ## sonar:        Report code analysis and test coverage results to SonarQube
 ##               (requires SonarQube server, run `docker-compose up` in
 ##                ./sonarqube/)
@@ -106,4 +111,4 @@ $(BANDITREP):
 	-bandit -r $(PACKAGE) --format json >$@
 
 
-.PHONY: help clean clean-all bdist_wheel install_dev sonar build_docker
+.PHONY: help clean clean-all bdist_wheel install_dev test sonar build_docker

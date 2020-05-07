@@ -3,6 +3,82 @@
 
 This project is intended to be used as a template in order to set up a simple dev-ops pipeline for your Python code.
 
+Features:
+
+ - [Project structure following common conventions](#python-project-structure)
+ - [Setting up a development environment with setuptools](#setup-development-environment)
+ - [Build a Python wheel package with setuptools](#build-pip-package-for-deployment)
+ - [Running code analyses and reporting results to SonarQube](sonarqube/)
+ - [Implementing this process in a multi-stage Docker build](#build-docker-image-for-deployment)
+
+## Quickstart
+
+### Development environment
+
+Prerequisites: 
+ - Current working directory `dev-ops` 
+
+```bash
+# virtual enviroment
+python3 -m venv venv
+source venv/bin/activate
+# install dependencies and link sources to PYTHONPATH
+make install_dev 
+# run application
+sampleproject --help
+```
+### Reporting to SonarQube
+
+Prerequisites: 
+ - Current working directory `dev-ops` 
+ - [Installed development environment and activated virtual environment](#development-enviroment)
+
+```bash
+# start SonarQube Server
+docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d
+# wait until SonarQube has started at http://localhost:9000
+# run code analyses and report to SonarQube
+make sonar
+```
+
+### Build a Python wheel package
+
+Prerequisites: 
+ - Current working directory `dev-ops`
+
+```bash
+# build the wheel
+make bdist_wheel
+```
+Test the package:
+ - Set up a virtual environment outside the development directory (`dev-ops`) and activate it. 
+ - Install the wheel package in `dev-ops/dist` with `pip install`.
+
+### Build Docker image
+
+Prerequisites: 
+ - Current working directory `dev-ops`
+ - [SonarQube server is running](#reporting-to-sonarqube) 
+```bash
+# build the Docker image
+make build_docker
+# run container
+docker run --rm sampleproject
+```
+
+### Adapt this template for your project
+
+ - Pick a `<name>` for your project (here `sampleproject`).
+ - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)
+ - Put your unit tests in the `tests` directory. Directory must contain `__init__.py`.
+ - Put your executable Python scripts in the `scripts` directory. Not required necessarily because you can define entry points based on Python functions in `setup.py`
+ - Adapt `setup.py` to your needs. 
+   - Change the `name` to `<name>`. It is important that the name matches the name of the top-level import directory.
+   - Set a package version (here 0.1).
+   - Define your (executable) entry points with `scripts` and/or `entry_points`.
+   - Add package dependencies with `install_requires`.
+   - Set package meta data, like license, author, etc.
+
 ## Python project structure
 
 The project structure follows ideas discussed on [stackoverflow](https://stackoverflow.com/questions/193161/what-is-the-best-project-structure-for-a-python-application). Most importantly for the following top-level components:
@@ -17,21 +93,6 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
  - Use a `scripts` directory for storing scripts/binaries that are directly executable.
  - Use a `Makefile` for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
  - Use a `Dockerfile` that defines how to build and deploy the app in a container.
-
- The [Makefile](Makefile) file is used in order to simplify building and [code quality reporting](sonarqube/README.md). Note that you have to setup and activate the corresponding virtual environment (see below).
-```
-# help message
-make help
-
-# code quality reporting
-make clean-all && make sonar
-
-# building Python wheel
-make clean-all && make bdist_wheel
-
-# building Docker image
-make build_docker
-```
 
 Documentation:
  
@@ -48,7 +109,7 @@ quite independent of your system environment, e.g., independent of your installe
 
 Setup a virtual environment for development and deployment in a production environment 
 (current working directory `dev-ops`): 
-```
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -63,6 +124,8 @@ Since your dependencies will automatically be installed in the
 `PYTHONPATH`, you do not have to manually manage the `PYTHONPATH` anymore.
 ```
 pip install -r requirements.txt
+# alternatively run the command with make (see Makefile):
+make install_dev
 ```
 Important:
 
@@ -113,20 +176,21 @@ the [`setup.py`](setup.py) file.
    # Switch back to your system environment
    deactivate
 
-   # Create a test environment and activate it
+   # Create a test environment outside the development directory and activate it
+   cd ..
    python3 -m venv venv_test
    source venv_test/bin/activate
    
    # Install package into fresh environment
-   pip install dist/sampleproject-0.1-py3-none-any.whl
+   pip install dev-ops/dist/sampleproject-0.1-py3-none-any.whl
    ``` 
 
 3. Test the installed application:
    ```
-   entrypoint --help
+   sampleproject --help
    ```
    Notes:
-    - The executable has the generic name `entrypoint` since this script will
+    - `setup.py` also defines an executable with the generic name `entrypoint`. This script will
       will directly be mapped to the entry point for `docker run` (see below).
     - Additional executables with more specific name can be defined in `setup.py`.
 
@@ -145,7 +209,7 @@ building a Python wheel in a first stage as well as installing the wheel in a
 minimal image within the second stage. The Dockerfile implements the steps which
 are explained [above](#build-pip-package-for-deployment).
 
-1. For reporting analyses to SonarQube, the `sonarqube` [container](sonarqube/README.md) must be running and must be connected to the same Docker network, which will be used in the Docker image build below. If you have started the `sonarqube` container with `docker run`, set up the corresponding Docker network:
+1. For reporting analyses to SonarQube, the `sonarqube` [container](sonarqube/) must be running and must be connected to the same Docker network, which will be used in the Docker image build below. If you have started the `sonarqube` container with `docker run`, set up the corresponding Docker network:
    ```bash
    docker network create sonarqube_net
    docker network connect sonarqube_net sonarqube

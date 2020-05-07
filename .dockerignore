@@ -10,3 +10,4 @@ Dockerfile
 sonarqube/
 build/
 dist/
+venv*

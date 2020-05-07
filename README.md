@@ -14,7 +14,7 @@ Features:
 
 The following sections serve as a quickstart guide. More detailed documentation:
  - [Python packaging and docker deployment](docs/)
- - [SonarQube][sonarqube/]
+ - [SonarQube](sonarqube/)
 
 ## Python project structure
 
@@ -55,7 +55,7 @@ sampleproject --help
 
 Prerequisites: 
  - Current working directory `dev-ops` 
- - [Installed development environment and activated virtual environment](#development-enviroment)
+ - [Installed development environment and activated virtual environment](#development-environment)
 
 ```bash
 # start SonarQube Server

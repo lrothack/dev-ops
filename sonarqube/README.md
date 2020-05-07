@@ -3,7 +3,7 @@
 Below you will find a brief description on how to use [SonarQube with Docker](https://hub.docker.com/_/sonarqube/). 
 Some recommendations regarding a Docker installation on macOS can be found [here](../README.md).
 
-Follow the step below in order to set up SonarQube in a Docker container and analyze the Python code in [sample_project](../sample_project).
+Follow the step below in order to set up SonarQube server in a Docker container and report Python code analyses.
 
 ## Setting up SonarQube server with embedded database
 
@@ -27,7 +27,7 @@ Follow the step below in order to set up SonarQube in a Docker container and ana
 
 ## Setting up SonarQube server with PostgreSQL
 
-1. Multiple docker containers can be run with `docker-compose` (current working directory: `ml-ops/sonarqube`):
+1. Multiple docker containers can be run with `docker-compose` (current working directory: `dev-ops/sonarqube`):
    ```bash
    docker-compose up -d
    ```
@@ -48,11 +48,11 @@ Follow the step below in order to set up SonarQube in a Docker container and ana
 
 ## Generating reports from macOS
 
- 1. Setup a virtual environment and install the requirements (current working directory: `ml-ops`):
+ 1. Setup a virtual environment and install the requirements (current working directory: `dev-ops`):
     ```bash
-    python3 -m venv venv_sampleproject
-    source venv_sampleproject/bin/activate
-    pip install -r sample_project/requirements.txt
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
     ```
 
  2. Install the SonarQube client used for generating and sending reports:    
@@ -60,13 +60,13 @@ Follow the step below in order to set up SonarQube in a Docker container and ana
     brew install sonar-scanner
     ```
 
- 4. Configure the SonarQube project with `sonar-scanner` command-line arguments in the `sample_project` [Makefile](../sample_project/Makefile):
+ 4. Configure the SonarQube project with `sonar-scanner` command-line arguments in the [Makefile](../Makefile):
 
-3. Generate and send report (current working directory: `ml-ops/sample_project`):
+3. Generate and send report (current working directory: `dev-ops/`):
    ```bash
    make clean && make sonar
    ```
-   The [Makefile](../sample_project/Makefile) has targets for generating external reports (unittests, coverage, pylint, bandit) and running `sonar-scanner` in order to generate internal reports and transmit all reports to SonarQube server at http://localhost:9000 (default).
+   The [Makefile](../Makefile) has targets for generating external reports (unittests, coverage, pylint, bandit) and running `sonar-scanner` in order to generate internal reports and transmit all reports to SonarQube server at http://localhost:9000 (default).
    Notes: 
     - [`nosetests`](https://nose.readthedocs.io/en/latest/usage.html) creates unittest results and unittest code coverage, see `nosetests -h`
     - [`pylint`](https://www.pylint.org) creates code analysis report with respect to [PEP8](https://www.python.org/dev/peps/pep-0008/) compliance.
@@ -86,18 +86,16 @@ Follow the step below in order to set up SonarQube in a Docker container and ana
     
       # source directory/package (must contain __init__.py) 
       sonar.sources=sampleproject
-      # exclude generated unittest reports from analysis
-      sonar.exclusions=tests/*.xml
     
       # unittests directory/package (must contain __init__.py)
       sonar.tests=tests
       # report for unittest results
-      sonar.python.xunit.reportPath=tests/nosetests.xml
+      sonar.python.xunit.reportPath=.sonarreports/nosetests.xml
       # report for unittest coverage
-      sonar.python.coverage.reportPaths=tests/coverage.xml
+      sonar.python.coverage.reportPaths=.sonarreports/coverage.xml
       # linting
-      sonar.python.pylint.reportPath=pylint_report.txt
-      sonar.python.bandit.reportPaths=bandit_report.json
+      sonar.python.pylint.reportPath=.sonarreports/pylint_report.txt
+      sonar.python.bandit.reportPaths=.sonarreports/bandit_report.json
        ```
     
       The full documentation can be found [here](https://docs.sonarqube.org/latest/analysis/analysis-parameters/) and Python related settings can be found [here](https://docs.sonarqube.org/latest/analysis/coverage/).
@@ -117,15 +115,16 @@ To deactivate the `venv` after testing the container run: `deactivate`.
 
 Docker images are supposed to be minimal, thus, installing test tools and `sonar-scanner` is not a good idea for images intended for deployment. [Multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/) allow for building and testing in an intermediate image, before installing the final application into a minimal deployment image.
 
-The [sample_project](../sample_project/README.md) demonstrates the following approach:
-1. Define a Python pip package including dependencies and application code with [setup.py](../sample_project/setup.py).
-2. Define [Makefile](../sample_project/Makefile) targets `dev_deps` and `sonar` in oder to easily install (development) dependencies and run `sonar-scanner`.
-3. Define a multi-stage [Dockerfile](../sample_project/Dockerfile).
+The [build process](../README.md) demonstrates the following approach:
+1. Define a Python pip package including dependencies and application code with [setup.py](../setup.py).
+2. Define [Makefile](../Makefile) targets `install_dev` and `sonar` in oder to easily install (development) dependencies and run `sonar-scanner`.
+3. Define a multi-stage [Dockerfile](../Dockerfile).
 
    First stage (based on a Python based image):
     - Installs `sonar-scanner` 
-    - Install the application dependencies 
-    - Run `sonar-scanner` and build a Python wheel (`make all`, `all` is the default target and does not have to be specified)
+    - Install the application dependencies (`make install_dev`)
+    - Run code analyses and send report with `sonar-scanner` (`make sonar`)
+    - and build a Python wheel (`make bdist_wheel`)
 
    Second stage (based on a Python base image):
     - Copy the wheel Python package to the final deployment image

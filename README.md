@@ -1,7 +1,7 @@
 
-# Sample project
+# Python DevOps Template
 
-Intended for demonstrating DevOps/MLOps integration.
+This project is intended to be used as a template in order to set up a simple dev-ops pipeline for your Python code.
 
 ## Python project structure
 
@@ -11,14 +11,17 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
  - Use a `requirements.txt` file for setting up development environment (refers to `setup.py`).
  - Use a `setup.py` file for defining the app's pip deployment package (including dependencies). 
  - Use a `MANIFEST.in` file for advanced pip package build directives.
+ - Use a `LICENSE` for defining users' rights and obligations.
  - Don't use an `src` directory (redundant) but a top-level Python import package (here `sampleproject` directory).
  - Use a `tests` directory for unit tests (directory is a Python import package).
  - Use a `scripts` directory for storing scripts/binaries that are directly executable.
+ - Use a `Makefile` for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
+ - Use a `Dockerfile` that defines how to build and deploy the app in a container.
 
- The [Makefile](Makefile) file is used in order to simplify building and [code quality reporting](../sonarqube/README.md). Note that you have to setup and activate the corresponding virtual environment (see below).
+ The [Makefile](Makefile) file is used in order to simplify building and [code quality reporting](sonarqube/README.md). Note that you have to setup and activate the corresponding virtual environment (see below).
 ```
 # help message
-make
+make help
 
 # code quality reporting
 make clean-all && make sonar
@@ -44,10 +47,10 @@ in a single file. Applied within a virtual environment, the development and prod
 quite independent of your system environment, e.g., independent of your installed system packages, preferred IDE, etc.
 
 Setup a virtual environment for development and deployment in a production environment 
-(current working directory `ml-ops`): 
+(current working directory `dev-ops`): 
 ```
-python3 -m venv venv_sampleproject
-source venv_sampleproject/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 ```
 Do not forget to disable to switch back to your system environment by running the `deactivate` command after you are done.
 
@@ -59,12 +62,12 @@ sources in the `PYTHONPATH`.
 Since your dependencies will automatically be installed in the 
 `PYTHONPATH`, you do not have to manually manage the `PYTHONPATH` anymore.
 ```
-cd sample_project
 pip install -r requirements.txt
 ```
-It is **important** to change to the `sample_project` directory, because the
-`requirements.txt` file refers to the `setup.py` file which is expected to be 
-found in the current working directory.
+Important:
+
+`requirements.txt` refers to `setup.py` which is expected to be 
+found in the current working directory. Thus, you can manage your dependencies in a single place.
 
 [requirements.txt](requirements.txt):
 ```
@@ -87,7 +90,7 @@ The result of building a package from your Python application is a single wheel 
 easily be installed in any (virtual) Python environment. The package contents and its behavior are defined in
 the [`setup.py`](setup.py) file. 
 
-1. After switching to your virtual Python environment build the (binary) wheel (current working directory `ml-ops/sample_project`):
+1. After switching to your virtual Python environment build the (binary) wheel (current working directory `dev-ops/`):
    ```
    python setup.py bdist_wheel
    # alternatively run the command with make (see Makefile):
@@ -105,7 +108,7 @@ the [`setup.py`](setup.py) file.
     - `extras_require`: Defines different environments with different dependencies, e.g., for development/testing and production. Specific environments can be installed by appending `[<env>]` to the installation target (where `<env>` is replaced by the environment key, here `dev`), see [setuptools documentation](https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-dependencies).
     - `package_data`: Non-python files that should be included in the package have to be declared specifically. Further inclusion patterns can be defined in `MANIFEST.in`.
 
-2. Install the wheel in a test environment (`deactivate` any active virtual environment, current working directory `ml-ops`):
+2. Install the wheel in a test environment (`deactivate` any active virtual environment, current working directory `dev-ops`):
    ```
    # Switch back to your system environment
    deactivate
@@ -115,7 +118,7 @@ the [`setup.py`](setup.py) file.
    source venv_test/bin/activate
    
    # Install package into fresh environment
-   pip install sample_project/dist/sampleproject-0.1-py3-none-any.whl
+   pip install dist/sampleproject-0.1-py3-none-any.whl
    ``` 
 
 3. Test the installed application:
@@ -142,17 +145,17 @@ building a Python wheel in a first stage as well as installing the wheel in a
 minimal image within the second stage. The Dockerfile implements the steps which
 are explained [above](#build-pip-package-for-deployment).
 
-1. For reporting analyses to SonarQube, the `sonarqube` [container](../sonarqube/README.md) must be running and must be connected to the same Docker network, which will be used in the Docker image build below. If you have started the `sonarqube` container with `docker run`, set up the corresponding Docker network:
+1. For reporting analyses to SonarQube, the `sonarqube` [container](sonarqube/README.md) must be running and must be connected to the same Docker network, which will be used in the Docker image build below. If you have started the `sonarqube` container with `docker run`, set up the corresponding Docker network:
    ```bash
    docker network create sonarqube_net
    docker network connect sonarqube_net sonarqube
    ```
-   **Note**: If you have been using `docker-compose` the network is managed in [docker-compose.yml](../sonarqube/docker-compose.yml) and should already exist. Check with
+   **Note**: If you have been using `docker-compose` the network is managed in [docker-compose.yml](sonarqube/docker-compose.yml) and should already exist. Check with
    ```bash
    docker network ls
    ```
    You can check if the managed containers are connected to the network with `docker container inspect`.
-2. The build process for sample_project will be triggered within the `sonarqube_net` network:
+2. The build process for sampleproject will be triggered within the `sonarqube_net` network:
    ```bash
    docker build --rm --network=sonarqube_net -t sampleproject .
    # alternatively run the command with make (see Makefile):

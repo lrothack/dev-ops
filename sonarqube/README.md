@@ -1,7 +1,6 @@
 # SonarQube server
 
 Below you will find a brief description on how to use [SonarQube with Docker](https://hub.docker.com/_/sonarqube/). 
-Some recommendations regarding a Docker installation on macOS can be found [here](../README.md).
 
 Follow the step below in order to set up SonarQube server in a Docker container and report Python code analyses.
 

@@ -39,19 +39,23 @@ Documentation:
 
 ## Development environment
 
+Automatically install dependencies and symlink your sources to your Python environment.
+
 Prerequisites: 
  - Current working directory `dev-ops` 
 
 ```bash
-# virtual enviroment
+# virtual environment
 python3 -m venv venv
 source venv/bin/activate
-# install dependencies and link sources to PYTHONPATH
+# install dependencies and symlink sources to PYTHONPATH
 make install_dev 
 # run application
 sampleproject --help
 ```
 ## Reporting to SonarQube
+
+Start a SonarQube server, run code analysis in your local Python development environment and report the results to SonarQube.
 
 Prerequisites: 
  - Current working directory `dev-ops` 
@@ -67,6 +71,8 @@ make sonar
 
 ## Build Python wheel
 
+Build a Python wheel package for your application that can easily be installed (sources and dependecies) in another Python environment.
+
 Prerequisites: 
  - Current working directory `dev-ops`
 
@@ -80,6 +86,9 @@ Test the package:
 
 ## Build Docker image
 
+Build a Docker image in two stages. The first stages runs unit tests, code analyses, reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
+Note that the build process in the first stage is independent from your local development environment.
+
 Prerequisites: 
  - Current working directory `dev-ops`
  - [SonarQube server is running](#reporting-to-sonarqube) 
@@ -91,6 +100,8 @@ docker run --rm sampleproject
 ```
 
 ## Adapt this template for your project
+
+If you are fine with the conventions that have been followed in the template, you can easily adapt the template for your own project:
 
  - Pick a `<name>` for your project (here `sampleproject`).
  - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)

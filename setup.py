@@ -21,7 +21,7 @@ setup(name="sampleproject",
       setup_requires=['wheel'],
       # Define package dependencies
       # install_requires=[],
-      # Defines def environment containing additional dependencies
+      # Defines dev environment containing additional dependencies
       # (for linting, testing)
       extras_require={'dev': ['nose',
                               'coverage',

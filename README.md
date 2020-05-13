@@ -40,6 +40,8 @@ Documentation:
 ## Development environment
 
 Automatically install dependencies and symlink your sources to your Python environment.
+Note that also development dependencies will be installed automatically.
+Development dependencies, like linter and test tools, can be managed in addition to runtime dependencies.
 
 Prerequisites: 
  - Current working directory `dev-ops` 
@@ -71,7 +73,7 @@ make sonar
 
 ## Build Python wheel
 
-Build a Python wheel package for your application that can easily be installed (sources and dependecies) in another Python environment.
+Build a Python wheel package for your application that can easily be installed (sources and runtime dependencies) in another Python environment.
 
 Prerequisites: 
  - Current working directory `dev-ops`
@@ -80,14 +82,14 @@ Prerequisites:
 # build the wheel
 make bdist_wheel
 ```
-Test the package:
+Test the installation of the package:
  - Set up a virtual environment outside the development directory (`dev-ops`) and activate it. 
  - Install the wheel package in `dev-ops/dist` with `pip install`.
 
 ## Build Docker image
 
-Build a Docker image in two stages. The first stages runs unit tests, code analyses, reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
-Note that the build process in the first stage is independent from your local development environment.
+Build a Docker image in two stages. The first stage runs unit tests, code analyses, reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
+Note that the build process in the first stage as well as the runtime environment in the second stage are independent from your local development environment.
 
 Prerequisites: 
  - Current working directory `dev-ops`
@@ -112,5 +114,7 @@ If you are fine with the conventions that have been followed in the template, yo
    - Set a package version (here 0.1).
    - Define your (executable) entry points with `scripts` and/or `entry_points`.
    - Add package dependencies with `install_requires`.
+   - Adapt development dependencies in `extras_require` as needed.
+   - Add additional (non source) files in `package_data` as needed.
    - Set package meta data, like license, author, etc.
 

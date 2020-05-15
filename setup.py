@@ -57,5 +57,7 @@ setup(name="sampleproject",
                    "License :: OSI Approved :: MIT License",
                    #  "License :: Other/Proprietary License",
                    "Operating System :: OS Independent",
-                   ]
+                   ],
+      # Do not assume that the package can safely be run as a zip archive
+      zip_safe=False
       )

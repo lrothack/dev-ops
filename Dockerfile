@@ -1,9 +1,10 @@
 FROM python:3.8-slim-buster as build
 # The python base image contains python, pip, etc. in a slim Debian buster 
 
-# Sonar-Scanner (SonarQube client) configuration
 # Variables defined with ARG can be modified when building the Docker image
 # --> see docker build --build-arg
+
+# Sonar-Scanner (SonarQube client) configuration
 # Enable/disable sonar reporting
 ARG SONAR=True
 ARG SONARHOST=sonarqube

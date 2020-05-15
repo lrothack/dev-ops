@@ -80,8 +80,9 @@ test:
 
 
 ## sonar:        Report code analysis and test coverage results to SonarQube
-##               (requires SonarQube server, run `docker-compose up` in
-##                ./sonarqube/)
+##               (requires SonarQube server, run:
+##                `docker-compose -p sonarqube \
+##                                -f sonarqube/docker-compose.yml up -d`)
 #                (requires code analysis dependencies, 
 #                 intall with `make install_dev`)
 #                (requires SonarQube client sonar-scanner, 
@@ -101,7 +102,10 @@ sonar: $(NOSETESTSREP) $(COVERAGEREP) $(PYLINTREP) $(BANDITREP)
 
 ## build_docker: Build docker image for Python application including
 ##               code analysis and reporting to SonarQube (multi-stage build)
-##               (WARNING: do not run in Docker, Docker-in-Docker!)
+##               (requires SonarQube server, see target 'sonar' above)
+##               (SonarQube reporting during Docker build can be disabled
+##                with `make build_docker DOCKERSONAR=False`)
+#                (WARNING: do not run in Docker, Docker-in-Docker!)
 # The if-statement is required in order to determine if we have to run the
 # build in the $(DOCKERNET) network
 build_docker:

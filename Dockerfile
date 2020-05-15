@@ -4,13 +4,17 @@ FROM python:3.8-slim-buster as build
 # Sonar-Scanner (SonarQube client) configuration
 # Variables defined with ARG can be modified when building the Docker image
 # --> see docker build --build-arg
+# Enable/disable sonar reporting
+ARG SONAR=True
+ARG SONARHOST=sonarqube
+ARG SONARPORT=9000
 # Installation directory for sonar-scanner
 ARG SONAR_SCANNER_HOME=/opt/sonar-scanner
 # sonar-scanner version, allows to control which version will be installed
 ARG SONAR_SCANNER_VERSION=4.3.0.2102
-ENV SONAR_SCANNER_HOME=${SONAR_SCANNER_HOME} \
-    SONAR_SCANNER_VERSION=${SONAR_SCANNER_VERSION} \
-    PATH=${SONAR_SCANNER_HOME}/bin:${PATH}
+# Define environment variables based on arguments
+# Add sonar-scanner executable to PATH for sonar reporting
+ENV PATH=${SONAR_SCANNER_HOME}/bin:${PATH}
 
 # Install debian packages required for sonar-scanner installation
 RUN apt-get update \
@@ -19,10 +23,11 @@ RUN apt-get update \
 
 # Install sonar-scanner, based on sonar-scanner-cli Dockerfile --> see docker hub
 WORKDIR /opt
-RUN wget -U "scannercli" -q -O /opt/sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip \
+RUN if [ ${SONAR} = "True" ] ; then \
+    wget -U "scannercli" -q -O /opt/sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux.zip \
     && unzip sonar-scanner-cli.zip \
     && rm sonar-scanner-cli.zip \
-    && mv sonar-scanner-${SONAR_SCANNER_VERSION}-linux ${SONAR_SCANNER_HOME} 
+    && mv sonar-scanner-${SONAR_SCANNER_VERSION}-linux ${SONAR_SCANNER_HOME} ;fi
 
 # Copy Python app into image 
 WORKDIR /app
@@ -36,7 +41,18 @@ COPY . .
 # SONARNOSCM disables SonarQube's version control support (e.g., for git) as
 # it is not customary to copy the actual repository (.git/) into the the image
 # for building (also see Makefile) 
-RUN make clean-all && make install_dev && make sonar SONARHOST=sonarqube SONARNOSCM=True
+# SONAR reporting can be disabled by passing --build-arg SONAR=False
+# only unit tests will be run in this case
+# Note that the build won't fail if unit tests fail (in both cases)
+RUN if [ ${SONAR} = "True" ] ; then \
+    make clean-all \
+    && make install_dev \
+    && make sonar SONARHOST=${SONARHOST} SONARPORT=${SONARPORT} SONARNOSCM=True \
+    ; else \
+    make clean-all \
+    && make install_dev \
+    && (make test || exit 0) \
+    ;fi
 # Use Makefile in order to build a Python wheel from the app
 RUN make clean-all && make bdist_wheel
 

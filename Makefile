@@ -2,18 +2,40 @@
 #           '## ' indicates text for 'help' target 
 #
 
+# Directory where unittests are located
 TESTS=tests
+# Directory where to save linting and testing reports
 REPDIR=.sonarreports
+# Report result files
 NOSETESTSREP=$(REPDIR)/nosetests.xml
 COVERAGEREP=$(REPDIR)/coverage.xml
 PYLINTREP=$(REPDIR)/pylint_report.txt
 BANDITREP=$(REPDIR)/bandit_report.json
+# Name of the application defined in setup.py
 NAME:=$(shell python setup.py --name)
+# Version of the application defined in setup.py
 VERSION:=$(shell python setup.py --version)
+# Name of the directory where application sources are located
 PACKAGE=$(NAME)
+# Configuration variables for local sonarqube reporting with `make sonar`
+# Report to sonar host (when running locally)
 SONARHOST=localhost
+# Report to sonar port (when running locally)
 SONARPORT=9000
+# DISABLE/enable whether to include SCM (git) meta info in sonarqube report
 SONARNOSCM=False
+# Configuration variables for sonarqube reporting within Docker build when
+# running `make build_docker`, i.e., variables will be passed to Docker build
+# as build arguments
+# Enable/disable SonarQube reporting during Docker build
+DOCKERSONAR=True
+# Report to sonar host (when running in Docker build)
+DOCKERSONARHOST=sonarqube
+# Report to sonar port (when running in Docker build)
+DOCKERSONARPORT=9000
+# Docker network for running the Docker build. Sonarqube server must be hosted
+# in the same network at $DOCKERSONARHOST:$DOCKERSONARPORT
+# Only evaluated if $DOCKERSONAR==True
 DOCKERNET=sonarqube_net
 
 
@@ -80,11 +102,22 @@ sonar: $(NOSETESTSREP) $(COVERAGEREP) $(PYLINTREP) $(BANDITREP)
 ## build_docker: Build docker image for Python application including
 ##               code analysis and reporting to SonarQube (multi-stage build)
 ##               (WARNING: do not run in Docker, Docker-in-Docker!)
+# The if-statement is required in order to determine if we have to run the
+# build in the $(DOCKERNET) network
 build_docker:
+	@echo "WARNING: Do not run this target within a Docker build/container"
+ifeq ($(DOCKERSONAR), True)
 	@echo "building Docker image within Docker network $(DOCKERNET)"
 	@echo "(make sure SonarQube is running in the same network)"
-	@echo "WARNING: Do not run this target within a Docker build/container"
-	docker build --rm --network=$(DOCKERNET) -t $(NAME) .
+	@echo "(run \`docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d\`)"
+	docker build --rm --network=$(DOCKERNET) -t $(NAME) . \
+		--build-arg SONARHOST=$(DOCKERSONARHOST) \
+		--build-arg SONARPORT=$(DOCKERSONARPORT)
+else
+	@echo "building Docker image without reporting to SonarQube"
+	docker build --rm -t $(NAME) . --build-arg SONAR=$(DOCKERSONAR)
+endif
+	@echo "build finished, run the container with \`docker run --rm $(NAME)\`"
 
 # analysis tools can be installed with `make install_dev`
 # leading - ignores error codes, make would fail if test case fails

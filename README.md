@@ -27,7 +27,8 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
 
  - Use a `README.md` file (this file).
  - Use a `requirements.txt` file for setting up development environment (refers to `setup.py`).
- - Use a `setup.py` file for defining the app's pip deployment package (including dependencies). 
+ - Use a `setup.py` file for defining the app's pip deployment package (including development dependencies) that are common to most dev-ops template projects. 
+ - Use a `setup.cfg` file for defining the app's pip deployment package (including runtime dependencies) that are project specific. 
  - Use a `MANIFEST.in` file for advanced pip package build directives.
  - Use a `LICENSE` for defining users' rights and obligations.
  - Don't use an `src` directory (redundant) but a top-level Python import package (here `sampleproject` directory).
@@ -118,13 +119,14 @@ If you are fine with the conventions that have been followed in the template, yo
  - Pick a `<name>` for your project (here `sampleproject`).
  - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)
  - Put your unit tests in the `tests` directory. Directory must contain `__init__.py`.
- - Put your executable Python scripts in the `scripts` directory. Not required necessarily because you can define entry points based on Python functions in `setup.py`
- - Adapt `setup.py` to your needs. 
+ - Put your executable Python scripts in the `scripts` directory. Not required necessarily because you can define entry points based on Python functions in `setup.cfg`
+ - Adapt `setup.cfg` to your needs. 
    - Change the `name` to `<name>`. It is important that the name matches the name of the top-level import directory.
    - Set a package version (here 0.1).
    - Define your (executable) entry points with `scripts` and/or `entry_points`.
    - Add package dependencies with `install_requires`.
-   - Adapt development dependencies in `extras_require` as needed.
    - Add additional (non source) files in `package_data` as needed.
    - Set package meta data, like license, author, etc.
+- Adapt `setup.py` to your needs. This should be uncommon since the configurations in `setup.py` are very generic. Project specific configurations should be made in `setup.cfg`.
+   - Adapt development dependencies in `extras_require` as needed or define additional build targets.
 

@@ -12,7 +12,7 @@ Features:
  - [Implementing this process in a multi-stage Docker build](#build-docker-image)
  - [Easily adapt the template for your own project](#adapt-this-template-for-your-project)
 
-These use cases are implemented in a `Makefile`. A summary of the most important targets can be obtained by running
+These use cases are accessible through a `Makefile`. A summary of the most important make targets can be obtained by running
 ```bash
 make help
 ```
@@ -95,7 +95,7 @@ Test the installation of the package:
 
 Build a Docker image in two stages. The first stage runs unit tests, code analyses, reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
 
-Note:
+Notes:
  - The build process in the first stage as well as the runtime environment in the second stage are independent from your local development environment.
  - Reporting analysis results to SonarQube in the first stage can be disabled with make argument `DOCKERSONAR=False`
 

@@ -31,6 +31,17 @@ setup(name="sampleproject",
                               'flake8']
                       },
 
+      # Data files should always be part of the package and you should avoid
+      # dependencies to data files outside of the package.
+      # find_packages (see above) searches Python packages and includes source
+      # files. In order to include data files, too, you can use
+      # include_package_data OR package_data
+      # Note that package_data will not work when include_package_data=True
+      # With include_package_data you must manage your data file includes in
+      # MANIFEST.in. With package_data you manage data file includes relative
+      # to package key provided in the dictionary.
+      # https://setuptools.readthedocs.io/en/latest/setuptools.html#including-data-files
+      # include_package_data=True,
       # package_data={
       #     # If any package contains *.txt or *.rst files, include them:
       #     "": ["*.txt", "*.rst"],

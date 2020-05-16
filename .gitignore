@@ -1,8 +1,8 @@
 .coverage
 .scannerwork
 .sonarreports/
-.eggs
+.eggs/
 *.egg-info/
 build/
 dist/
-venv*
+venv*/

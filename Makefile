@@ -2,21 +2,56 @@
 #           '## ' indicates text for 'help' target 
 #
 
+# Obtain paths based on MAKEFILE_LIST variable, since variable contents can
+# change while reading the Makefile (depending on include etc.) perforn 
+# immediate evaluation with ':='
+# Note that a single '=' is only evaluated when accessing the variable 
+# Current working directory 
+CWD := ${CURDIR}
+# Relative path to Makefile (from current working directory)
+MKFILE_PATH := $(lastword $(MAKEFILE_LIST))
+# Absolute path to Makefile's parent directory (project root)
+ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+
+# Define names of executables used in make targets (and variables)
+# Build and deployment tools
+PYTHON = python
+PIP = pip
+DOCKER = docker
+
+# Test and code analysis tools
+SONARSCANNER = sonar-scanner
+PYLINT = pylint
+NOSETESTS = nosetests
+BANDIT = bandit
+
+# Files required by setuptools (python setup.py, pip)
+# Note that setuptools can only supports running from the project root
+# --> SETUPTOOLSFILES must be present in the working directory
+SETUPTOOLSFILES = setup.py setup.cfg requirements.txt
+
+# Obtain Python package path, name and version
+# Lazy variable evualtion (with a single '=') is used in order to evaluate
+# variables only from inside make targets. This allows to check if SETUPTOOLSFILES
+# are present *before* executing the shell commands. 
+#
+# Name of the application defined in setup.py
+NAME=$(shell $(PYTHON) setup.py --name)
+# Version of the application defined in setup.py
+VERSION=$(shell $(PYTHON) setup.py --version)
+# Name of the directory where application sources are located
+PACKAGE=$(ROOT)/$(NAME)
 # Directory where unittests are located
-TESTS=tests
+TESTS=$(ROOT)/tests
+
 # Directory where to save linting and testing reports
-REPDIR=.sonarreports
+REPDIR=$(CWD)/.codereports
 # Report result files
 NOSETESTSREP=$(REPDIR)/nosetests.xml
 COVERAGEREP=$(REPDIR)/coverage.xml
 PYLINTREP=$(REPDIR)/pylint_report.txt
 BANDITREP=$(REPDIR)/bandit_report.json
-# Name of the application defined in setup.py
-NAME:=$(shell python setup.py --name)
-# Version of the application defined in setup.py
-VERSION:=$(shell python setup.py --version)
-# Name of the directory where application sources are located
-PACKAGE=$(NAME)
+
 # Configuration variables for local sonarqube reporting with `make sonar`
 # Report to sonar host (when running locally)
 SONARHOST=localhost
@@ -24,6 +59,7 @@ SONARHOST=localhost
 SONARPORT=9000
 # DISABLE/enable whether to include SCM (git) meta info in sonarqube report
 SONARNOSCM=False
+
 # Configuration variables for sonarqube reporting within Docker build when
 # running `make build_docker`, i.e., variables will be passed to Docker build
 # as build arguments
@@ -49,34 +85,38 @@ DOCKERNET=sonarqube_net
 ## help:         Print this comment-generated help message
 # reads contents of this file and expects that this file is called 'Makefile'
 help:
-	@sed -n 's/^## //p' Makefile
+	@sed -n 's/^## //p' $(MKFILE_PATH)
 
 ## clean:        Clean up auto-generated files
 clean:
-	rm -f $(NOSETESTSREP) $(COVERAGEREP)
-	rm -f $(PYLINTREP) $(BANDITREP)
+	@rm -f $(NOSETESTSREP) $(COVERAGEREP)
+	@rm -f $(PYLINTREP) $(BANDITREP)
 
 ## clean-all:    Clean up auto-generated files and directories
 ##               (WARNING: do not store user data in auto-generated directories)
 clean-all: clean
-	rm -rf $(NAME).egg-info
-	rm -rf build
-	rm -rf dist
+	@rm -rf $(NAME).egg-info
+	@rm -rf build
+	@rm -rf dist
+
+# Check if setuptools files exist in current working directory, otherwise stop.
+$(SETUPTOOLSFILES):
+	$(error "Python packaging files missing in working directory ($(SETUPTOOLSFILES))")
 
 ## bdist_wheel:  Build a Python wheel with setuptools (based on setup.py)
-bdist_wheel:
-	python setup.py bdist_wheel
+bdist_wheel: $(SETUPTOOLSFILES)
+	$(PYTHON) setup.py bdist_wheel
 
 ## install_dev:  Install development dependencies (based on setup.py)
 ##               (installation within a Python virtual environment is
 ##                recommended)
 ##               (application sources will be symlinked to PYTHONPATH)
-install_dev:
-	pip install -r requirements.txt
+install_dev: $(SETUPTOOLSFILES)
+	$(PIP) install -r requirements.txt
 
 ## test:         Run Python unit tests with nosetests
 test:
-	nosetests --where $(TESTS)
+	$(NOSETESTS) --where $(TESTS)
 
 
 ## sonar:        Report code analysis and test coverage results to SonarQube
@@ -87,8 +127,8 @@ test:
 #                 intall with `make install_dev`)
 #                (requires SonarQube client sonar-scanner, 
 #                 install with `brew sonar-scanner` or see ./Dockerfile)
-sonar: $(NOSETESTSREP) $(COVERAGEREP) $(PYLINTREP) $(BANDITREP)
-	sonar-scanner -Dsonar.host.url=http://$(SONARHOST):$(SONARPORT) \
+sonar: $(NOSETESTSREP) $(COVERAGEREP) $(PYLINTREP) $(BANDITREP) $(SETUPTOOLSFILES)
+	$(SONARSCANNER) -Dsonar.host.url=http://$(SONARHOST):$(SONARPORT) \
               -Dsonar.projectKey=$(NAME) \
               -Dsonar.projectVersion=$(VERSION) \
               -Dsonar.sourceEncoding=UTF-8 \
@@ -108,44 +148,47 @@ sonar: $(NOSETESTSREP) $(COVERAGEREP) $(PYLINTREP) $(BANDITREP)
 #                (WARNING: do not run in Docker, Docker-in-Docker!)
 # The if-statement is required in order to determine if we have to run the
 # build in the $(DOCKERNET) network
-build_docker:
-	@echo "WARNING: Do not run this target within a Docker build/container"
+# Note: info is parsed and immediately printed by make, echo is executed in a
+# shell as are the other commands in the recipe.
+build_docker: $(SETUPTOOLSFILES)
+	$(info WARNING: Do not run this target within a Docker build/container)
+	$(info Running Docker build in context $(ROOT))
 ifeq ($(DOCKERSONAR), True)
-	@echo "building Docker image within Docker network $(DOCKERNET)"
-	@echo "(make sure SonarQube is running in the same network)"
-	@echo "(run \`docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d\`)"
-	docker build --rm --network=$(DOCKERNET) -t $(NAME) . \
+	$(info building Docker image within Docker network $(DOCKERNET))
+	$(info (make sure SonarQube is running in the same network))
+	$(info (run `docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d`))
+	$(DOCKER) build --rm --network=$(DOCKERNET) -t $(NAME) $(ROOT) \
 		--build-arg SONARHOST=$(DOCKERSONARHOST) \
 		--build-arg SONARPORT=$(DOCKERSONARPORT)
 else
-	@echo "building Docker image without reporting to SonarQube"
-	docker build --rm -t $(NAME) . --build-arg SONAR=$(DOCKERSONAR)
+	$(info building Docker image without reporting to SonarQube)
+	$(DOCKER) build --rm -t $(NAME) $(ROOT) --build-arg SONAR=$(DOCKERSONAR)
 endif
 	@echo "build finished, run the container with \`docker run --rm $(NAME)\`"
 
 # analysis tools can be installed with `make install_dev`
 # leading - ignores error codes, make would fail if test case fails
 $(NOSETESTSREP):
-	mkdir -p $(REPDIR)
-	-nosetests --with-xunit --xunit-file=$@ --where $(TESTS)
+	@mkdir -p $(REPDIR)
+	-$(NOSETESTS) --with-xunit --xunit-file=$@ --where $(TESTS)
 
 # analysis tools can be installed with `make install_dev`
 # leading - ignores error codes, make would fail if test case fails
 $(COVERAGEREP):
-	mkdir -p $(REPDIR)
-	-nosetests --with-coverage --cover-xml --cover-xml-file=../$@ --where $(TESTS)
+	@mkdir -p $(REPDIR)
+	-$(NOSETESTS) --with-coverage --cover-xml --cover-xml-file=$@ --where $(TESTS)
 	
 # analysis tools can be installed with `make install_dev`
 # --exit-zero always return exit code 0: make would fail otherwise
-$(PYLINTREP): 
-	mkdir -p $(REPDIR)
-	pylint $(PACKAGE) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $@
+$(PYLINTREP): $(SETUPTOOLSFILES)
+	@mkdir -p $(REPDIR)
+	$(PYLINT) $(PACKAGE) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $@
 
 # analysis tools can be installed with `make install_dev`
 # leading - ignores error codes, make would fail if test case fails
-$(BANDITREP):
-	mkdir -p $(REPDIR)
-	-bandit -r $(PACKAGE) --format json >$@
+$(BANDITREP): $(SETUPTOOLSFILES)
+	@mkdir -p $(REPDIR)
+	-$(BANDIT) -r $(PACKAGE) --format json >$@
 
 
 .PHONY: help clean clean-all bdist_wheel install_dev test sonar build_docker

@@ -33,7 +33,7 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
  - Use a `LICENSE` for defining users' rights and obligations.
  - Don't use an `src` directory (redundant) but a top-level Python import package (here `sampleproject` directory).
  - Use a `tests` directory for unit tests (directory is a Python import package).
- - Use a `scripts` directory for storing scripts/binaries that are directly executable.
+ - Use a `scripts` directory for storing Python scripts that are directly executable.
  - Use a `Makefile` for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
  - Use a `Dockerfile` that defines how to build and deploy the app in a container.
 

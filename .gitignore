@@ -1,6 +1,6 @@
 .coverage
 .scannerwork
-.sonarreports/
+.codereports/
 .eggs/
 *.egg-info/
 build/

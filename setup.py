@@ -1,8 +1,13 @@
 from setuptools import setup, find_packages
 
-# setup.py file is used together with configurations in setup.cfg
+# setup.py file is used together with configurations in setup.cfg.
 # Configurations that are common to dev-ops template projects go to setup.py
-# Project specific configurations go to setup.cfg
+# Project specific configurations go to setup.cfg.
+#
+# The 'Makefile' triggers builds and uses setup.py/setup.cfg/requirements.txt
+# Adapt the Makefile variable SETUPTOOLSFILES if dependencies change, e.g.,
+# you switch to using only setup.py xor setup.cfg for defining your package.
+
 setup(
     # Exclude all subpackages that contain 'tests'
     # Note: excluding top-level tests dir requires directive in MANIFEST.in

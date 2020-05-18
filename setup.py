@@ -11,7 +11,9 @@ setup(
                     'wheel'],
     # Defines dev environment containing additional dependencies
     # (for linting, testing)
-    extras_require={'dev': ['nose',
+    extras_require={'dev': ['pip >= 20.1',
+                            'wheel',
+                            'nose',
                             'coverage',
                             'bandit',
                             'pylint',

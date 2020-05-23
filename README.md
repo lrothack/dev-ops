@@ -28,16 +28,16 @@ The following sections serve as a quickstart guide. More detailed documentation:
 The project structure follows ideas discussed on [stackoverflow](https://stackoverflow.com/questions/193161/what-is-the-best-project-structure-for-a-python-application). Most importantly for the following top-level components:
 
 - Use a `README.md` file (this file).
-- Use a `requirements.txt` file for setting up development environment (refers to `setup.py`).
-- Use a `setup.py` file for defining the app's pip deployment package (including development dependencies) that are common to most dev-ops template projects.
-- Use a `setup.cfg` file for defining the app's pip deployment package (including runtime dependencies) that are project specific.
-- Use a `MANIFEST.in` file for advanced pip package build directives.
-- Use a `LICENSE` for defining users' rights and obligations.
-- Don't use an `src` directory (redundant) but a top-level Python import package (here `sampleproject` directory).
-- Use a `tests` directory for unit tests (directory is a Python import package).
-- Use a `scripts` directory for storing Python scripts that are directly executable.
-- Use a `Makefile` for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
-- Use a `Dockerfile` that defines how to build and deploy the app in a container.
+- Use a [`requirements.txt`](requirements.txt) file for setting up development environment (refers to [`setup.py`](setup.py)).
+- Use a [`setup.py`](setup.py) file for defining the app's pip deployment package (including development dependencies) that are common to most dev-ops template projects.
+- Use a [`setup.cfg`](setup.cfg) file for defining the app's pip deployment package (including runtime dependencies) that are project specific.
+- Use a [`MANIFEST.in`](MANIFEST.in) file for advanced pip package build directives.
+- Use a [`LICENSE`](LICENSE) for defining users' rights and obligations.
+- Don't use an `src` directory (redundant) but a top-level Python import package (here [`sampleproject`](sampleproject/) directory).
+- Use a [`tests`](tests/) directory for unit tests (directory is a Python import package).
+- Use a [`scripts`](scripts/) directory for storing Python scripts that are directly executable.
+- Use a [`Makefile`](Makefile) for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
+- Use a [`Dockerfile`](Dockerfile) that defines how to build and deploy the app in a container.
 
 Documentation:
 
@@ -129,14 +129,17 @@ If you are fine with the conventions that have been followed in the template, yo
 
 - Pick a `<name>` for your project (here `sampleproject`).
 - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)
-- Put your unit tests in the `tests` directory. Directory must contain `__init__.py`.
-- Put your executable Python scripts in the `scripts` directory. Not required necessarily because you can define entry points based on Python functions in `setup.cfg`
-- Adapt `setup.cfg` to your needs.
+- Put your unit tests in the [`tests`](tests/) directory. Directory must contain `__init__.py`.
+- Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.cfg`](setup.cfg)
+- Adapt [`setup.cfg`](setup.cfg) to your needs.
   - Change the `name` to `<name>`. It is important that the name matches the name of the top-level import directory.
   - Set a package version (here 0.1).
   - Define your (executable) entry points with `scripts` and/or `entry_points`.
   - Add package dependencies with `install_requires`.
   - Add additional (non source) files in `package_data` as needed.
   - Set package meta data, like license, author, etc.
- Adapt `setup.py` to your needs. This should be uncommon since the configurations in `setup.py` are very generic. Project specific configurations should be made in `setup.cfg`.
+- Adapt [`setup.py`](setup.py) to your needs. This should be uncommon since the configurations in [`setup.py`](setup.py) are very generic. Project specific configurations should be made in [`setup.cfg`](setup.cfg).
   - Adapt development dependencies in `extras_require` as needed or define additional build targets.
+- Adapt [`Dockerfile`](Dockerfile) to your needs. This should be uncommon since the definitions/configurations are rather generic.
+  - Adapt the `ENTRYPOINT` definition. Currently uses the executable with the generic name `entrypoint` which is defined in [`setup.cfg`](setup.cfg). Make sure to adjust your definitions in `setup.cfg`/`setup.py` accordingly.
+  - Adapt the runtime environment. The application is currently run as user `user` in working directory `/home/user/app`.

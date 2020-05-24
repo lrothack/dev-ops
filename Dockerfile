@@ -39,12 +39,13 @@ WORKDIR /app
 COPY . .
 
 # Use Makefile in order to test/analyse and report results to SonarQube
-# Sonar analysis requires that SonarQube runs on host 'sonarqube' on port 9000
-# --> see Makefile
-# this can easily be achieved by naming the SonarQube container 'sonarqube' and
-# building this image within the same (docker) network where 'sonarqube' runs 
+# Sonar analysis requires that SonarQube server is running (by default on 
+# host 'sonarqube' and port 9000, see Makefile).
+# This can easily be achieved by naming the SonarQube container 'sonarqube' and
+# building this image within the same (docker) network where the 'sonarqube'
+# container is running.
 # SONARNOSCM disables SonarQube's version control support (e.g., for git) as
-# it is not customary to copy the actual repository (.git/) into the the image
+# it is not customary to copy the actual repository (.git/) into the image
 # for building (also see Makefile) 
 # SONAR reporting can be disabled by passing --build-arg SONAR=False
 # only unit tests will be run in this case
@@ -56,7 +57,7 @@ RUN if [ ${SONAR} = "True" ] ; then \
     ; else \
     make clean-all \
     && make install_dev \
-    && (make test || exit 0) \
+    && (make pylint test || exit 0) \
     ;fi
 # Use Makefile in order to build a Python wheel from the app
 RUN make clean-all && make bdist_wheel

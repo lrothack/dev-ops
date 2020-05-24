@@ -97,7 +97,7 @@ DOCKERNET=sonarqube_net
 
 # --- Common targets ---
 
-.PHONY: help clean clean-all bdist_wheel install_dev test sonar build_docker
+.PHONY: help clean clean-all bdist_wheel install_dev test pylint sonar build_docker
 
 ## 
 ## MAKEFILE for building and testing Python package including
@@ -145,6 +145,10 @@ install_dev: $(SETUPTOOLSFILES)
 ## test:         Run Python unit tests with nosetests
 test:
 	$(NOSETESTS) --where $(TESTS)
+
+## pylint:       Run Python linter and print output to terminal
+pylint:
+	$(PYLINT) --exit-zero $(PACKAGE)
 
 
 # --- SonarQube targets ---

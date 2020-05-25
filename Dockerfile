@@ -66,6 +66,8 @@ RUN make clean-all && make bdist_wheel
 # --> sonar-scanner and test libs are not required here 
 FROM python:3.8-slim-buster
 
+ARG ENTRYPOINT
+ENV ENTRYPOINT=${ENTRYPOINT}
 # pip environment variables: no version check, no caching
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PIP_NO_CACHE_DIR=1
@@ -85,14 +87,20 @@ COPY --from=build /app/dist/*.whl /dist/
 # Install the Python wheel 
 #(also installs all dependencies are specified in the wheel)
 RUN pip install /dist/*.whl
+# Switch to working directory in user's home, dir exists due to useradd param
+WORKDIR /home/user/app
+# Copy entrypoint.sh script from build stage
+COPY --from=build /app/scripts/entrypoint.sh .
+# Change owner
+RUN chown user:user . ; chown user:user entrypoint.sh
 # Switch user/set user for running the app
 USER user
-# Switch to working directory in user's home
-WORKDIR ${HOME}/app
 # Specify entrypoint in json style 
-ENTRYPOINT ["entrypoint"]
-# Provide a default arg with CMD
+ENTRYPOINT ["./entrypoint.sh"]
+# Provide default args with CMD. Default args are overridden by command-line
+# arguments to docker run on the command-line.
 CMD ["--help"]
 # Important: both entrypoint and cmd have to be specified in json style
 # --> json style allows for better CLI interoperability when running the 
-# container
+# container. Most importantly users can provide command-line arguments for
+# the entrypoint script. 

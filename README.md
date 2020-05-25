@@ -35,7 +35,7 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
 - Use a [`LICENSE`](LICENSE) for defining users' rights and obligations.
 - Don't use an `src` directory (redundant) but a top-level Python import package (here [`sampleproject`](sampleproject/) directory).
 - Use a [`tests`](tests/) directory for unit tests (directory is a Python import package).
-- Use a [`scripts`](scripts/) directory for storing Python scripts that are directly executable.
+- Use a [`scripts`](scripts/) directory for storing scripts that are directly executable.
 - Use a [`Makefile`](Makefile) for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
 - Use a [`Dockerfile`](Dockerfile) that defines how to build and deploy the app in a container.
 
@@ -131,15 +131,24 @@ If you are fine with the conventions that have been followed in the template, yo
 - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)
 - Put your unit tests in the [`tests`](tests/) directory. Directory must contain `__init__.py`.
 - Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.cfg`](setup.cfg)
-- Adapt [`setup.cfg`](setup.cfg) to your needs.
-  - Change the `name` to `<name>`. It is important that the name matches the name of the top-level import directory.
+- Change [`setup.cfg`](setup.cfg) to your needs.
+  - Change the `name` to `<name>`. Important: The name must match the name of the top-level import directory.
   - Set a package version (here 0.1).
-  - Define your (executable) entry points with `scripts` and/or `entry_points`.
+  - Define your (executable) entry points with `scripts` and/or `entry_points`. Important: The [`entrypoint.sh`](scripts/entrypoint.sh) used in [`Dockerfile`](Dockerfile) expects that there is an executable called `<name>`.
   - Add package dependencies with `install_requires`.
   - Add additional (non source) files in `package_data` as needed.
   - Set package meta data, like license, author, etc.
-- Adapt [`setup.py`](setup.py) to your needs. This should be uncommon since the configurations in [`setup.py`](setup.py) are very generic. Project specific configurations should be made in [`setup.cfg`](setup.cfg).
-  - Adapt development dependencies in `extras_require` as needed or define additional build targets.
-- Adapt [`Dockerfile`](Dockerfile) to your needs. This should be uncommon since the definitions/configurations are rather generic.
-  - Adapt the `ENTRYPOINT` definition. Currently uses the executable with the generic name `entrypoint` which is defined in [`setup.cfg`](setup.cfg). Make sure to adjust your definitions in `setup.cfg`/`setup.py` accordingly.
-  - Adapt the runtime environment. The application is currently run as user `user` in working directory `/home/user/app`.
+- Change [`setup.py`](setup.py) to your needs. This should be uncommon since the configurations in [`setup.py`](setup.py) are very generic. Project specific configurations should be made in [`setup.cfg`](setup.cfg).
+  - Change development dependencies in `extras_require` as needed or define additional build targets.
+- Change [`Dockerfile`](Dockerfile) to your needs. This should be uncommon since the definitions/configurations are rather generic.
+  - Change the `ENTRYPOINT` / `CMD` definition. Set the entry point to your own script/executable, e.g., as defined in `setup.cfg`/`setup.py`.
+  - Change the runtime environment. The application is currently run as user `user` in working directory `/home/user/app`.
+
+### Docker ENTRYPOINT
+
+Dockerfile uses the bash script [`scripts/entrypoint.sh`](scripts/entrypoint.sh) as `ENTRYPOINT`.
+For this purpose, it is expected that there exists an executable `<name>` on the `PATH`.
+
+- `entrypoint.sh` executes the application `<name>` with all command-line arguments provided to `docker run`.
+- The `<name>` of the application is obtained through an environment variable. The environment variable is defined in the Docker container, see [`Dockerfile`](Dockerfile).
+- The value of the environment variable is obtained in [`Makefile`](Makefile) with `setuptools` and passed as a `build-arg` to [`Dockerfile`](Dockerfile).

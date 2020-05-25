@@ -134,21 +134,21 @@ If you are fine with the conventions that have been followed in the template, yo
 - Change [`setup.cfg`](setup.cfg) to your needs.
   - Change the `name` to `<name>`. Important: The name must match the name of the top-level import directory.
   - Set a package version (here 0.1).
-  - Define your (executable) entry points with `scripts` and/or `entry_points`. Important: The [`entrypoint.sh`](scripts/entrypoint.sh) used in [`Dockerfile`](Dockerfile) expects that there is an executable called `<name>`.
+  - Define your (executable) entry points with `scripts` and/or `entry_points`. Important: One executable must be called `<name>` ([see below](#docker-entrypoint)).
   - Add package dependencies with `install_requires`.
   - Add additional (non source) files in `package_data` as needed.
   - Set package meta data, like license, author, etc.
 - Change [`setup.py`](setup.py) to your needs. This should be uncommon since the configurations in [`setup.py`](setup.py) are very generic. Project specific configurations should be made in [`setup.cfg`](setup.cfg).
   - Change development dependencies in `extras_require` as needed or define additional build targets.
 - Change [`Dockerfile`](Dockerfile) to your needs. This should be uncommon since the definitions/configurations are rather generic.
-  - Change the `ENTRYPOINT` / `CMD` definition. Set the entry point to your own script/executable, e.g., as defined in `setup.cfg`/`setup.py`.
+  - Change the `ENTRYPOINT` / `CMD` definition. Set the definition according to your own defaults (scripts/executables).
   - Change the runtime environment. The application is currently run as user `user` in working directory `/home/user/app`.
 
 ### Docker ENTRYPOINT
 
-Dockerfile uses the bash script [`scripts/entrypoint.sh`](scripts/entrypoint.sh) as `ENTRYPOINT`.
-For this purpose, it is expected that there exists an executable `<name>` on the `PATH`.
+[`Dockerfile`](Dockerfile) uses the bash script [`entrypoint.sh`](entrypoint.sh) as `ENTRYPOINT`.
+For this purpose, it is expected that an executable `<name>` exists on the `PATH` in your Docker container.
 
-- `entrypoint.sh` executes the application `<name>` with all command-line arguments provided to `docker run`.
+- [`entrypoint.sh`](entrypoint.sh) executes the application `<name>` with all command-line arguments provided to `docker run`.
 - The `<name>` of the application is obtained through an environment variable. The environment variable is defined in the Docker container, see [`Dockerfile`](Dockerfile).
 - The value of the environment variable is obtained in [`Makefile`](Makefile) with `setuptools` and passed as a `build-arg` to [`Dockerfile`](Dockerfile).

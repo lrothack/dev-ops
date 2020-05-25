@@ -73,7 +73,7 @@ easily be installed in any (virtual) Python environment. The package contents an
    Notes on [`setup.cfg`](../setup.cfg) (project specific):
     - `name`: The name of the pip/Python package must match the name of the top-level import package in order to let the [Makefile](../Makefile) work correctly.
     - `version`: Either define your project version here or generate it accordingly. The version has to follow a defined [pattern](https://packaging.python.org/guides/distributing-packages-using-setuptools/#choosing-a-versioning-scheme).  
-    - `scripts`: Provides executables which are important to easily access the functionalities provided by the package. Executables are automatically installed on the `PATH`.
+    - `scripts`: Provides executables for accessing the functionalities provided by the package. Executables are automatically installed on the `PATH`.
     - `entry_points`: Automatically generate executables by Python package.module:function. Executables are installed on the `PATH`.
     - `install_requires`: Python package dependencies (corresponds to definitions in `requirements.txt`, `requirements.txt` refers to `setup.py` in order to avoid [redundancies](https://stackoverflow.com/questions/14399534/reference-requirements-txt-for-the-install-requires-kwarg-in-setuptools-setup-py/19081268#19081268)).
     - `package_data`: Non-python files that should be included in the package have to be declared specifically. Further inclusion patterns can be defined in `MANIFEST.in`.

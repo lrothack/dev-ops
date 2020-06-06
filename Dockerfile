@@ -9,6 +9,10 @@ FROM python:3.8-slim-buster as build
 ARG SONAR=True
 ARG SONARHOST=sonarqube
 ARG SONARPORT=9000
+# Disable/enable sonarqube's version control support
+# check that .dockerignore does not exclude .git* files/directories if you want
+# to use version control support
+ARG SONARNOSCM=True
 # Installation directory for sonar-scanner
 ARG SONAR_SCANNER_HOME=/opt/sonar-scanner
 # sonar-scanner version, allows to control which version will be installed
@@ -44,16 +48,16 @@ COPY . .
 # This can easily be achieved by naming the SonarQube container 'sonarqube' and
 # building this image within the same (docker) network where the 'sonarqube'
 # container is running.
-# SONARNOSCM disables SonarQube's version control support (e.g., for git) as
-# it is not customary to copy the actual repository (.git/) into the image
-# for building (also see Makefile) 
+# SONARNOSCM controls SonarQube's version control support (e.g., for git) in
+# case you do not want to copy the actual repository (.git/) into the image
+# for building (also see Makefile and .dockerignore, SONARNOSCM=True by default)
 # SONAR reporting can be disabled by passing --build-arg SONAR=False
 # only unit tests will be run in this case
 # Note that the build won't fail if unit tests fail (in both cases)
 RUN if [ ${SONAR} = "True" ] ; then \
     make clean-all \
     && make install_dev \
-    && make sonar SONARHOST=${SONARHOST} SONARPORT=${SONARPORT} SONARNOSCM=True \
+    && make sonar SONARHOST=${SONARHOST} SONARPORT=${SONARPORT} SONARNOSCM=${SONARNOSCM} \
     ; else \
     make clean-all \
     && make install_dev \

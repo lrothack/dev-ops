@@ -66,6 +66,11 @@ RUN make clean-all && make bdist_wheel
 # --> sonar-scanner and test libs are not required here 
 FROM python:3.8-slim-buster
 
+# Define value of ENTRYPOINT environment variable with build-arg ENTRYPOINT.
+# The environment variable will be available within the Docker container.
+# It specifies the name of the executable which will be called in the script
+# 'entrypoint.sh' in order to start the application. The script 'entrypoint.sh'
+# is defined as the Docker ENTRYPOINT (see below).
 ARG ENTRYPOINT
 ENV ENTRYPOINT=${ENTRYPOINT}
 # pip environment variables: no version check, no caching

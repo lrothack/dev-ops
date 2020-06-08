@@ -18,7 +18,7 @@ setup(
     # (for linting, testing)
     extras_require={'dev': ['pip >= 20.1.1',
                             'wheel',
-                            'nose',
+                            'pytest',
                             'coverage',
                             'bandit',
                             'pylint',

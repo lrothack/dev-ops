@@ -127,6 +127,7 @@ clean:
 ##               (WARNING: do not store user data in auto-generated directories)
 clean-all: clean
 	@rm -rf .coverage .scannerwork
+	@rm -rf .pytest_cache
 	@rm -rf $(REPDIR)
 	@rm -rf $(NAME).egg-info
 	@rm -rf build
@@ -153,7 +154,8 @@ install-dev: $(SETUPTOOLSFILES)
 
 ## test:         Run Python unit tests with pytest
 test:
-	$(PYTEST)
+	-$(COVERAGE) run --source $(PACKAGE) -m $(PYTEST)
+	$(COVERAGE) report -m
 
 ## pylint:       Run Python linter and print output to terminal
 pylint:

@@ -29,8 +29,7 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
 
 - Use a `README.md` file (this file).
 - Use a [`requirements.txt`](requirements.txt) file for setting up development environment (refers to [`setup.py`](setup.py)).
-- Use a [`setup.py`](setup.py) file for defining the app's pip deployment package (including development dependencies) that are common to most dev-ops template projects.
-- Use a [`setup.cfg`](setup.cfg) file for defining the app's pip deployment package (including runtime dependencies) that are project specific.
+- Use a [`setup.py`](setup.py) file for defining the app's pip deployment package (including development dependencies).
 - Use a [`MANIFEST.in`](MANIFEST.in) file for advanced pip package build directives.
 - Use a [`LICENSE`](LICENSE) for defining users' rights and obligations.
 - Don't use an `src` directory (redundant) but a top-level Python import package (here [`sampleproject`](sampleproject/) directory).
@@ -130,15 +129,15 @@ If you are fine with the conventions that have been followed in the template, yo
 - Pick a `<name>` for your project (here `sampleproject`).
 - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)
 - Put your unit tests in the [`tests`](tests/) directory. Directory must contain `__init__.py`.
-- Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.cfg`](setup.cfg)
-- Change [`setup.cfg`](setup.cfg) to your needs.
+- Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.py`](setup.py)
+- Change [`setup.py`](setup.py) to your needs.
   - Change the `name` to `<name>`. Important: The name must match the name of the top-level import directory.
-  - Set a package version (here 0.1).
+  - Set a package version (here 0.1.0).
+  - Define the package sources. `find_packages` will recursively search the `include` directory, i.e., the top-level import directory.
   - Define your (executable) entry points with `scripts` and/or `entry_points`. Important: One executable must be called `<name>` ([see below](#docker-entrypoint)).
   - Add package dependencies with `install_requires`.
   - Add additional (non source) files in `package_data` as needed.
   - Set package meta data, like license, author, etc.
-- Change [`setup.py`](setup.py) to your needs. This should be uncommon since the configurations in [`setup.py`](setup.py) are very generic. Project specific configurations should be made in [`setup.cfg`](setup.cfg).
   - Change development dependencies in `extras_require` as needed or define additional build targets.
 - Change [`Dockerfile`](Dockerfile) to your needs. This should be uncommon since the definitions/configurations are rather generic.
   - Change the `ENTRYPOINT` / `CMD` definition. Set the definition according to your own defaults (scripts/executables).

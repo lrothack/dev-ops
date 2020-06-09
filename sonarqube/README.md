@@ -74,12 +74,13 @@ Follow the step below in order to set up SonarQube server in a Docker container 
    make clean && make sonar
    ```
 
-   The [Makefile](../Makefile) has targets for generating external reports (unittests, coverage, pylint, bandit) and running `sonar-scanner` in order to generate internal reports and transmit all reports to SonarQube server at [http://localhost:9000](http://localhost:9000) (default).
+   `make sonar` generates external reports (pytest, coverage, pylint, bandit) and runs `sonar-scanner` in order to transmit all reports to the SonarQube server at [http://localhost:9000](http://localhost:9000) (default).
    Notes:
-    - [`nosetests`](https://nose.readthedocs.io/en/latest/usage.html) creates unittest results and unittest code coverage, see `nosetests -h`
+    - [`pytest`](https://docs.pytest.org/en/stable/) runs unit tests, see `pytest -h`
+    - [`coverage`](https://coverage.readthedocs.io/en/coverage-5.1/) analyzes test coverage, see `coverage -h`
     - [`pylint`](https://www.pylint.org) creates code analysis report with respect to [PEP8](https://www.python.org/dev/peps/pep-0008/) compliance.
-      Messages have to follow a defined format, see [SonarQube docu](https://docs.sonarqube.org/latest/analysis/languages/python/) (section Pylint) and `pylint -h`
-    - [`bandit`](https://pypi.org/project/bandit/) create code analysis reports with respect to common security issues in Python, SonarQube expects json report, also see `bandit -h`
+      Messages have to follow a defined format, see [SonarQube documentation](https://docs.sonarqube.org/latest/analysis/languages/python/) (section Pylint) and `pylint -h`
+    - [`bandit`](https://pypi.org/project/bandit/) analyses security issues in Python, SonarQube expects json report, also see `bandit -h`
     - [sonar-scanner](https://docs.sonarqube.org/latest/analysis/scan/sonarscanner/) is configured with command line flags according to:
 
       ```bash
@@ -99,12 +100,12 @@ Follow the step below in order to set up SonarQube server in a Docker container 
       # unittests directory/package (must contain __init__.py)
       sonar.tests=tests
       # report for unittest results
-      sonar.python.xunit.reportPath=.sonarreports/nosetests.xml
+      sonar.python.xunit.reportPath=.codereports/pytest.xml
       # report for unittest coverage
-      sonar.python.coverage.reportPaths=.sonarreports/coverage.xml
+      sonar.python.coverage.reportPaths=.codereports/coverage.xml
       # linting
-      sonar.python.pylint.reportPath=.sonarreports/pylint_report.txt
-      sonar.python.bandit.reportPaths=.sonarreports/bandit_report.json
+      sonar.python.pylint.reportPath=.codereports/pylint.txt
+      sonar.python.bandit.reportPaths=.codereports/bandit.json
        ```
 
       The full documentation can be found [here](https://docs.sonarqube.org/latest/analysis/analysis-parameters/) and Python related settings can be found [here](https://docs.sonarqube.org/latest/analysis/coverage/).
@@ -126,15 +127,15 @@ Docker images are supposed to be minimal, thus, installing test tools and `sonar
 The [build process](../README.md) demonstrates the following approach:
 
 1. Define a Python pip package including dependencies and application code with [setup.py](../setup.py).
-2. Define [Makefile](../Makefile) targets `install_dev` and `sonar` in oder to easily install (development) dependencies and run `sonar-scanner`.
+2. Define [Makefile](../Makefile) targets `install-dev` and `sonar` in oder to easily install (development) dependencies and run `sonar-scanner`.
 3. Define a multi-stage [Dockerfile](../Dockerfile).
 
-   First stage (based on a Python based image):
+   First stage (based on a Python image):
     - Installs `sonar-scanner`
-    - Install the application dependencies (`make install_dev`)
+    - Install the application dependencies (`make install-dev`)
     - Run code analyses and send report with `sonar-scanner` (`make sonar`)
-    - and build a Python wheel (`make bdist_wheel`)
+    - and build a Python wheel (`make dist`)
 
-   Second stage (based on a Python base image):
+   Second stage (based on a Python image):
     - Copy the wheel Python package to the final deployment image
     - Install the wheel Python package

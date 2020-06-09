@@ -31,7 +31,7 @@ Since your dependencies will automatically be installed in the
 ```bash
 pip install -r requirements.txt
 # alternatively run the command with make (see Makefile):
-make install_dev
+make install-dev
 ```
 
 Important:
@@ -60,27 +60,27 @@ is found on [stackoverflow](https://stackoverflow.com/questions/14399534/referen
 
 The result of building a package from your Python application is a single wheel file (`.whl`) which can
 easily be installed in any (virtual) Python environment. The package contents and its behavior are defined in
-[`setup.py`](../setup.py) and [`setup.cfg`](../setup.cfg). The former contains generic configurations (common to most dev-ops template projects) while the latter is project specific. `setup.cfg` is read automatically when running `setup.py`.
+[`setup.py`](../setup.py).
 
 1. After switching to your virtual Python environment build the (binary) wheel (current working directory `dev-ops/`):
 
    ```bash
    python setup.py bdist_wheel
    # alternatively run the command with make (see Makefile):
-   make bdist_wheel
+   make dist
    ```
 
-   Notes on [`setup.cfg`](../setup.cfg) (project specific):
+   Notes on [`setup.py`](../setup.py) (project specific):
     - `name`: The name of the pip/Python package must match the name of the top-level import package in order to let the [Makefile](../Makefile) work correctly.
     - `version`: Either define your project version here or generate it accordingly. The version has to follow a defined [pattern](https://packaging.python.org/guides/distributing-packages-using-setuptools/#choosing-a-versioning-scheme).  
+    - `packages`: Defines how to include/exclude Python import packages. Can be specified manually or with [find_packages](https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages). Projects using an `src` directory ([bad practice](https://docs.python-guide.org/writing/structure/#the-actual-module)) can *include* the `src` directory only. Otherwise, you have to *exclude* everything you do not want to ship with your deployment package.
     - `scripts`: Provides executables for accessing the functionalities provided by the package. Executables are automatically installed on the `PATH`.
     - `entry_points`: Automatically generate executables by Python package.module:function. Executables are installed on the `PATH`.
     - `install_requires`: Python package dependencies (corresponds to definitions in `requirements.txt`, `requirements.txt` refers to `setup.py` in order to avoid [redundancies](https://stackoverflow.com/questions/14399534/reference-requirements-txt-for-the-install-requires-kwarg-in-setuptools-setup-py/19081268#19081268)).
     - `package_data`: Non-python files that should be included in the package have to be declared specifically. Further inclusion patterns can be defined in `MANIFEST.in`.
 
    Notes on [`setup.py`](../setup.py) (common to most dev-ops template projects):
-    - `packages`: Defines how to include/exclude Python import packages. Can be specified manually or with [find_packages](https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages). Projects using an `src` directory ([bad practice](https://docs.python-guide.org/writing/structure/#the-actual-module)) can *include* the `src` directory only. Otherwise, you have to *exclude* everything you do not want to ship with your deployment package.
-    - `tests` directory contains unit test which are typically not part of the deployment package. Excluding tests requires `exclude` [definitions](https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages) and [directives](https://stackoverflow.com/questions/8556996/setuptools-troubles-excluding-packages-including-data-files/11669299#11669299) in the `MANIFEST.in` file.
+    - `tests` directory contains unit tests which are typically not part of the deployment package. Excluding tests requires `exclude` [definitions](https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages) and [directives](https://stackoverflow.com/questions/8556996/setuptools-troubles-excluding-packages-including-data-files/11669299#11669299) in the `MANIFEST.in` file.
     - `setup_requires`: Python package dependencies required before running setup.
     - `extras_require`: Defines different environments with different dependencies, e.g., for development/testing. Specific environments can be installed by appending `[<env>]` to the installation target (where `<env>` is replaced by the environment key, here `dev`), see [setuptools documentation](https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-dependencies).
 
@@ -106,9 +106,7 @@ easily be installed in any (virtual) Python environment. The package contents an
    ```
 
    Notes:
-    - `setup.cfg` also defines an executable with the generic name `entrypoint`. This script will
-      will directly be mapped to the entry point for `docker run` (see below).
-    - Additional executables with more specific name can be defined in `setup.cfg`.
+    - Additional executables with more specific name can be defined in `setup.py`.
 
 Documentation:
 
@@ -146,7 +144,7 @@ are explained [above](#build-pip-package-for-deployment).
    ```bash
    docker build --rm --network=sonarqube_net -t sampleproject .
    # alternatively run the command with make (see Makefile):
-   make build_docker
+   make docker-build
    ```
 
    Notes:

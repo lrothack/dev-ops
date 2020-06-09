@@ -9,9 +9,6 @@ from setuptools import setup, find_packages
 # you switch to using only setup.py xor setup.cfg for defining your package.
 
 setup(
-    # Exclude all subpackages that contain 'tests'
-    # Note: excluding top-level tests dir requires directive in MANIFEST.in
-    packages=find_packages(exclude=['tests', '*.tests', '*.tests.*']),
     setup_requires=['setuptools >= 40.9.0',
                     'wheel'],
     # Defines dev environment containing additional dependencies

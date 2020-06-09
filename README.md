@@ -35,7 +35,7 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
 - Don't use an `src` directory (redundant) but a top-level Python import package (here [`sampleproject`](sampleproject/) directory).
 - Use a [`tests`](tests/) directory for unit tests (directory is a Python import package).
 - Use a [`scripts`](scripts/) directory for storing scripts that are directly executable.
-- Use a [`Makefile`](Makefile) for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview)
+- Use a [`Makefile`](Makefile) for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview).
 - Use a [`Dockerfile`](Dockerfile) that defines how to build and deploy the app in a container.
 
 Documentation:
@@ -59,7 +59,7 @@ Prerequisites:
 python3 -m venv venv
 source venv/bin/activate
 # install dependencies and symlink sources to PYTHONPATH
-make install_dev
+make install-dev
 # run application
 sampleproject --help
 ```
@@ -91,7 +91,7 @@ Prerequisites:
 
 ```bash
 # build the wheel
-make bdist_wheel
+make dist
 ```
 
 Test the installation of the package:
@@ -115,9 +115,9 @@ Prerequisites:
 
 ```bash
 # build the Docker image including reporting to SonarQube
-make build_docker
+make docker-build
 # alternatively the Docker image can be built without reporting to SonarQube
-make build_docker DOCKERSONAR=False
+make docker-build DOCKERSONAR=False
 # run container
 docker run --rm sampleproject
 ```

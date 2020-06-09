@@ -28,9 +28,9 @@ PIP = pip
 # Files required by setuptools (python setup.py, pip)
 # Note that setuptools can only supports running from the project root
 # --> SETUPTOOLSFILES must be present in the working directory
-# Adjust the list when your configuration changes, e.g., one of the files is
-# not used anymore.
-SETUPTOOLSFILES = setup.py setup.cfg requirements.txt
+# Adjust the list when your configuration changes, e.g., you use additional
+# files one of the files is not used anymore.
+SETUPTOOLSFILES = setup.py requirements.txt
 #
 # Obtain Python package path, name and version
 # Lazy variable evualtion (with a single '=') is used in order to evaluate
@@ -130,6 +130,7 @@ clean-all: clean
 	@rm -rf .pytest_cache
 	@rm -rf $(REPDIR)
 	@rm -rf $(NAME).egg-info
+	@rm -rf $(PACKAGE)/$(NAME).egg-info
 	@rm -rf build
 	@rm -rf dist
 

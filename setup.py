@@ -4,7 +4,36 @@ The 'Makefile' triggers builds and uses setup.py/requirements.txt
 Adapt the Makefile variable SETUPTOOLSFILES if dependencies change, e.g.,
 you switch to using only setup.py and/or setup.cfg for defining your package.
 """
+import os
+import re
 from setuptools import setup, find_packages
+
+
+def parse_version():
+    """Parse version number from __init__.py in top-level import package
+
+    It is assumed that the version is defined as a string and the '=' sign
+    is surrounded by at most one whitespace character to the left and to the
+    right.
+
+    Returns:
+        version string
+    Raises:
+        ValueError if the parser could not match the version definition
+    """
+    init_fpath = os.path.join('devopstemplate', '__init__.py')
+    with open(init_fpath, 'r') as fh:
+        init_contents = fh.read()
+        ver_re = r"^__version__ ?= ?['\"]([^'\"]*)['\"]"
+        match = re.search(ver_re, init_contents, re.M)
+        if match:
+            version = match.group(1)
+            return version
+        else:
+            raise ValueError('Could not parse version string')
+
+
+version = parse_version()
 
 with open('README.md', 'r') as fh:
     description_long = fh.read()
@@ -16,7 +45,7 @@ with open('README.md', 'r') as fh:
 setup(name='sampleproject',
       # The version string will be included in your Python package
       # https://setuptools.readthedocs.io/en/latest/setuptools.html#specifying-your-project-s-version
-      version='0.1.0',
+      version=version,
       python_requires='>= 3.6',
       # Define the package sources.
       packages=find_packages(include=['sampleproject']),

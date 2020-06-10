@@ -127,12 +127,12 @@ docker run --rm sampleproject
 If you are fine with the conventions that have been followed in the template, you can easily adapt the template for your own project:
 
 - Pick a `<name>` for your project (here `sampleproject`).
-- Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`)
+- Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`).
+- Define the package version in `<name>/__init__.py` (default is `__version__ = '0.1.0'`).
 - Put your unit tests in the [`tests`](tests/) directory. Directory must contain `__init__.py`.
-- Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.py`](setup.py)
+- Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.py`](setup.py).
 - Change [`setup.py`](setup.py) to your needs.
   - Change the `name` to `<name>`. Important: The name must match the name of the top-level import directory.
-  - Set a package version (here 0.1.0).
   - Define the package sources. `find_packages` will recursively search the `include` directory, i.e., the top-level import directory.
   - Define your (executable) entry points with `scripts` and/or `entry_points`. Important: One executable must be called `<name>` ([see below](#docker-entrypoint)).
   - Add package dependencies with `install_requires`.

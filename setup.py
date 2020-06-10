@@ -36,7 +36,9 @@ def parse_version(package_rpath):
             raise ValueError('Could not parse version string')
 
 
-version = parse_version('sampleproject')
+pkg_name = '{{project_slug}}'
+
+version = parse_version(pkg_name)
 
 with open('README.md', 'r') as fh:
     description_long = fh.read()
@@ -45,13 +47,13 @@ with open('README.md', 'r') as fh:
 # see Makefile variable PACKAGE.
 # Naming the project as the top-level import package is also consistent with
 # conventions.
-setup(name='sampleproject',
+setup(name=pkg_name,
       # The version string will be included in your Python package
       # https://setuptools.readthedocs.io/en/latest/setuptools.html#specifying-your-project-s-version
       version=version,
       python_requires='>= 3.6',
       # Define the package sources.
-      packages=find_packages(include=['sampleproject']),
+      packages=find_packages(include=[pkg_name]),
       # Dependencies for running setuptools (triggered from Makefile)
       setup_requires=['setuptools >= 40.9.0',
                       'wheel'],
@@ -71,14 +73,14 @@ setup(name='sampleproject',
       # Include scripts/executables for application from 'scripts' directory
       # Executables will be included in the PATH search directory of the Python
       # environment, e.g., a virtual environment or /usr/local/bin
-      scripts=['scripts/samplescript'],
+      # scripts=['scripts/samplescript'],
       # Generate entry points (executables) automatically from Python functions
       #     executable = package.module:function
       # Executables will be included in the PATH search directory of the Python
       # environment, e.g., a virtual environment or /usr/local/bin
       entry_points={
           'console_scripts': [
-              'sampleproject=sampleproject.sample:main',
+              f'{pkg_name}={pkg_name}.main:main',
           ],
       },
       # Data files should always be part of the package and you should avoid
@@ -102,26 +104,30 @@ setup(name='sampleproject',
       # archive
       zip_safe=False,
       # Package meta information
-      author='UNKNOWN',
-      author_email='UNKNOWN',
-      description='This is an example package',
+      author='{{author_name}}',
+      author_email='{{author_email}}',
+      description='{{project_description}}',
       long_description=description_long,
       long_description_content_type='text/markdown',
       # keywords = 'keyword1, keyword2, keyword3'
-      url='',
+      url='{{project_url}}',
       # project_urls={
       #     'Bug Tracker': 'https://bugs.example.com/HelloWorld/',
       #     'Documentation': 'https://docs.example.com/HelloWorld/',
       #     'Source Code': 'https://code.example.com/HelloWorld/'
       # },
       platforms='any',
-      license='MIT',
+      # license='MIT',
       # Define the intended audience of your Python package
       # For a full list of classifiers see: https://pypi.org/classifiers/
       classifiers=[
           'Intended Audience :: Developers',
-          'License :: OSI Approved :: MIT License',
+          #   'License :: OSI Approved :: MIT License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
-          'Programming Language :: Python :: 3']
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
+      ]
       )

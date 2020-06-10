@@ -9,19 +9,22 @@ import re
 from setuptools import setup, find_packages
 
 
-def parse_version():
+def parse_version(package_rpath):
     """Parse version number from __init__.py in top-level import package
 
     It is assumed that the version is defined as a string and the '=' sign
     is surrounded by at most one whitespace character to the left and to the
     right.
 
+    Params:
+        package_rpath: String with the relative path to the package
+            (with respect to setup.py)
     Returns:
-        version string
+        version: String with the version number
     Raises:
-        ValueError if the parser could not match the version definition
+        ValueError: if the parser could not match the version definition
     """
-    init_fpath = os.path.join('devopstemplate', '__init__.py')
+    init_fpath = os.path.join(package_rpath, '__init__.py')
     with open(init_fpath, 'r') as fh:
         init_contents = fh.read()
         ver_re = r"^__version__ ?= ?['\"]([^'\"]*)['\"]"
@@ -33,7 +36,7 @@ def parse_version():
             raise ValueError('Could not parse version string')
 
 
-version = parse_version()
+version = parse_version('sampleproject')
 
 with open('README.md', 'r') as fh:
     description_long = fh.read()

@@ -1,31 +1,37 @@
-import unittest
+import pytest
 from argparse import Namespace
 import {{project_slug}}.main
 
 
-class TestMain(unittest.TestCase):
+@pytest.fixture
+def args_ns_ref():
+    return Namespace()
 
-    def setUp(self):
-        self.__args_ns_exp = Namespace()
 
-    def test_parseargs(self):
-        arg_list = []
-        args_ns = {{project_slug}}.main.parse_args(arg_list)
-        # Define expected result
-        self.__args_ns_exp.verbose = False
-        self.__args_ns_exp.quiet = False
-        self.assertEqual(args_ns, self.__args_ns_exp)
+def test_parseargs(args_ns_ref):
+    arg_list = []
+    args_ns = {{project_slug}}.main.parse_args(arg_list)
+    # Define reference/expected result
+    args_ns_ref.verbose = False
+    args_ns_ref.quiet = False
+    assert args_ns == args_ns_ref
 
-    def test_parseargs_verbose(self):
-        arg_list = ['--verbose']
-        args_ns = {{project_slug}}.main.parse_args(arg_list)
-        self.__args_ns_exp.verbose = True
-        self.__args_ns_exp.quiet = False
-        self.assertEqual(args_ns, self.__args_ns_exp)
 
-    def test_parseargs_quiet(self):
-        arg_list = ['--quiet']
-        args_ns = {{project_slug}}.main.parse_args(arg_list)
-        self.__args_ns_exp.verbose = False
-        self.__args_ns_exp.quiet = True
-        self.assertEqual(args_ns, self.__args_ns_exp)
+def test_parseargs_verbose(args_ns_ref):
+    arg_list = ['--verbose']
+    args_ns = {{project_slug}}.main.parse_args(arg_list)
+    args_ns_ref.verbose = True
+    args_ns_ref.quiet = False
+    assert args_ns == args_ns_ref
+
+
+def test_parseargs_quiet(args_ns_ref):
+    arg_list = ['--quiet']
+    args_ns = {{project_slug}}.main.parse_args(arg_list)
+    args_ns_ref.verbose = False
+    args_ns_ref.quiet = True
+    assert args_ns == args_ns_ref
+
+
+if __name__ == "__main__":
+    pytest.main()

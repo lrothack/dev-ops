@@ -2,6 +2,7 @@ import sys
 import platform
 import logging
 import argparse
+import {{project_slug}}
 
 
 def parse_args(args_list):

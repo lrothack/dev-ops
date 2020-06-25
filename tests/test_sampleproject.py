@@ -6,11 +6,14 @@ import sampleproject.main
 
 @pytest.fixture
 def args_ns_ref():
-    return Namespace()
+    args_ns = Namespace()
+    args_ns.smnd1 = 2
+    args_ns.smnd2 = 2
+    return args_ns
 
 
 def test_parseargs(args_ns_ref):
-    arg_list = []
+    arg_list = ['2', '2']
     args_ns = sampleproject.main.parse_args(arg_list)
     # Define reference/expected result
     args_ns_ref.verbose = False
@@ -19,7 +22,7 @@ def test_parseargs(args_ns_ref):
 
 
 def test_parseargs_verbose(args_ns_ref):
-    arg_list = ['--verbose']
+    arg_list = ['--verbose', '2', '2']
     args_ns = sampleproject.main.parse_args(arg_list)
     args_ns_ref.verbose = True
     args_ns_ref.quiet = False
@@ -27,14 +30,14 @@ def test_parseargs_verbose(args_ns_ref):
 
 
 def test_parseargs_quiet(args_ns_ref):
-    arg_list = ['--quiet']
+    arg_list = ['--quiet', '2', '2']
     args_ns = sampleproject.main.parse_args(arg_list)
     args_ns_ref.verbose = False
     args_ns_ref.quiet = True
     assert args_ns == args_ns_ref
 
 
-def test_add(self):
+def test_add():
     a = random.randint(0, 100)
     b = random.randint(0, 100)
     assert a+b == sampleproject.main.Calc.add(a, b)

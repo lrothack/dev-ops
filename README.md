@@ -124,7 +124,14 @@ docker run --rm sampleproject
 
 ## Adapt this template for your project
 
-If you are fine with the conventions that have been followed in the template, you can easily adapt the template for your own project:
+If you are fine with the conventions that have been followed in the template, you can easily adapt the template for your own project.
+
+### Command-line tools
+
+- [Cookiecutter template](https://github.com/lrothack/cookiecutter-pydevops)
+- [devopstemplate command-line interface](https://github.com/lrothack/dev-ops-admin)
+
+### Manual
 
 - Pick a `<name>` for your project (here `sampleproject`).
 - Put your code in a directory called `<name>`. Directory must contain `__init__.py`. This will be your top-level import package (e.g., `import <name>`).

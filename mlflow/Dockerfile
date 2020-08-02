@@ -24,6 +24,9 @@ RUN apt-get update \
 # the non-binary version must be compiled, which does not seem necessary here
 #
 # boto3 provides the AWS S3 client API
+# The AWS client (and credentials) are required for reading artifacts in the
+# MlFlow web interface. The (Python) script that logs the artifacts, access the
+# S3 storage directly and does, therefore, need its own client/credentials.
 #
 # Install the latest version of mlflow in the system Python environment
 RUN pip install psycopg2-binary boto3 mlflow 

@@ -3,6 +3,7 @@ version: "3"
 services:
     mongo:
         # starts the container mongo with the image mongo:latest
+        # --> use a specific version tag in production environments
         image: mongo
         # YAML interprets xx:yy as base 60 values
         # --> always specify port definitions as string

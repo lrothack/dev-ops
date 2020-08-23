@@ -30,7 +30,7 @@ docker-compose down
 2. Run the sample script. The script prints the database contents and adds an entry to the database using the [pymongo](https://api.mongodb.com/python/current/tutorial.html) API. If you run the script multiple times, the number of database entries should accumulate.
 
     ```bash
-    python3 mongo_connection.py
+    python3 mongo_sample.py
     ```
 
     Note: Due to the persistent volume, your entries should not be lost after stopping and starting the container.

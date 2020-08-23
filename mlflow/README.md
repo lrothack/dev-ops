@@ -41,7 +41,7 @@ docker-compose down
 2. Run the sample script. The script creates the S3-compatible bucket `mlflow` in the MinIO server. It creates an experiment and log sample parameters, metrics and an artifact (e.g., a model file) to the MlFlow tracking server. Note that the artifacts are written to the S3 storage directly. Therefore, the client needs access information/credentials for the S3 storage.
 
    ```bash
-   python3 mlflow_connection.py
+   python3 mlflow_sample.py
    ```
 
 3. Go to [http://localhost:5000](http://localhost:5000) and you should see the logged experiment data including the artifact within the `random-test` experiment.

@@ -4,7 +4,7 @@ from pprint import pformat
 from pymongo import MongoClient
 
 
-def mongo_connect():
+def mongo_sample():
     host = '127.0.0.1'
     client = MongoClient(host=host)
     db = client.test_database
@@ -36,4 +36,4 @@ if __name__ == "__main__":
     # LOGGING_FORMAT = '[%(name)s] %(message)s'
     logging.basicConfig(level=logging.INFO,
                         format=LOGGING_FORMAT)
-    mongo_connect()
+    mongo_sample()

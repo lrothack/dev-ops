@@ -1,6 +1,6 @@
 # MongoDB Server
 
-The [MongoDB](https://www.mongodb.com) is a NoSQL server. The MLFlow server will
+The [MongoDB](https://www.mongodb.com) is a NoSQL server. The MongoDB server will
 be started in a dockerized environment through [`docker-compose.yml`](docker-compose.yml).
 
 Assuming the project name/context of the docker compose file is `mongodb`:

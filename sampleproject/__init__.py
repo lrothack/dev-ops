@@ -1,4 +1,3 @@
-
 """Top-level import package for sampleproject"""
 from sampleproject.log import LoggerConfig
 

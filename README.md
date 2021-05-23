@@ -7,7 +7,7 @@ Features:
 
 - [Project structure following common conventions](#python-project-structure)
 - [Setting up a development environment with setuptools](#development-environment)
-- [Running code analyses and reporting results to SonarQube](reporting-to-sonarqube)
+- [Running code analyses and reporting results to SonarQube](#reporting-to-sonarqube)
 - [Build a Python wheel package with setuptools](#build-python-wheel)
 - [Implementing this process in a multi-stage Docker build](#build-docker-image)
 - [Easily adapt the template for your own project](#adapt-this-template-for-your-project)
@@ -20,8 +20,8 @@ make help
 
 The following sections serve as a quickstart guide. More detailed documentation:
 
-- [Python packaging and docker deployment](docs/)
-- [SonarQube](sonarqube/)
+- [Python packaging and Docker deployment](docs/)
+- [Dockerized SonarQube server](sonarqube/)
 
 ## Python project structure
 
@@ -81,6 +81,8 @@ docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d
 make sonar
 ```
 
+More details on how to set up a SonarQube server in a dockerized environment can be found [here](sonarqube/).
+
 ## Build Python wheel
 
 Build a Python wheel package for your application that can easily be installed (sources and runtime dependencies) in another Python environment.
@@ -99,28 +101,34 @@ Test the installation of the package:
 - Set up a virtual environment outside the development directory (`dev-ops`) and activate it.
 - Install the wheel package in `dev-ops/dist` with `pip install`.
 
+More details on Python packaging can be found [here](docs/).
+
 ## Build Docker image
 
-Build a Docker image in two stages. The first stage runs unit tests, code analyses, reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
+Build a Docker image in two stages. The first stage runs unit tests, code analyses, (optionally) reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
 
 Notes:
 
 - The build process in the first stage as well as the runtime environment in the second stage are independent from your local development environment.
-- Reporting analysis results to SonarQube in the first stage can be disabled with make argument `DOCKERSONAR=False`
+- Reporting analysis results to SonarQube in the first stage is disabled by default and can be enabled with make argument `DOCKERSONAR=True`
 
 Prerequisites:
 
 - Current working directory `dev-ops`
-- [SonarQube server is running](#reporting-to-sonarqube) (optional if `DOCKERSONAR=False`)
+- [SonarQube server is running](#reporting-to-sonarqube) (only if `DOCKERSONAR=True`)
 
 ```bash
-# build the Docker image including reporting to SonarQube
+# build the Docker image without reporting to SonarQube
 make docker-build
-# alternatively the Docker image can be built without reporting to SonarQube
-make docker-build DOCKERSONAR=False
+# alternatively the Docker image can be built with reporting to SonarQube
+make docker-build DOCKERSONAR=True
 # run container
 docker run --rm sampleproject
 ```
+
+Reporting to SonarQube within the two-stage build process, requires an active Docker network during the build. This is unsupported with BuildKit.
+
+More details on Docker deployment can be found [here](docs/).
 
 ## Adapt this template for your project
 

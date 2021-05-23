@@ -142,12 +142,13 @@ are explained [above](#build-pip-package-for-deployment).
 2. The build process for sampleproject will be triggered within the `sonarqube_net` network:
 
    ```bash
-   docker build --rm --network=sonarqube_net -t sampleproject .
+   DOCKER_BUILDKIT=0 docker build --rm --network=sonarqube_net -t sampleproject .
    # alternatively run the command with make (see Makefile):
    make docker-build
    ```
 
    Notes:
+    - `DOCKER_BUILDKIT=0` environment variable disables BuildKit in order to support a Docker network during build
     - `--rm` flag removes intermediate containers (also useful with `docker run`)
     - `--network` specifies the name of the Docker network for building the image
     - `-t sampleproject` specifies the name of the tag that can be used to refer to the image

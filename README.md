@@ -110,7 +110,7 @@ Build a Docker image in two stages. The first stage runs unit tests, code analys
 Notes:
 
 - The build process in the first stage as well as the runtime environment in the second stage are independent from your local development environment.
-- Reporting analysis results to SonarQube in the first stage is disabled by default and can be enabled with make argument `DOCKERSONAR=True`
+- Reporting analysis results to SonarQube in the first stage is disabled by default and can be enabled with make argument `DOCKERSONAR=True`.
 
 Prerequisites:
 

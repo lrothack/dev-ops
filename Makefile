@@ -182,7 +182,10 @@ lint: $(SETUPTOOLSFILES) $(PACKAGE)
 #                 intall with `make install-dev`)
 #                (requires SonarQube client sonar-scanner on PATH or 
 #                 Docker image sonarsource/sonar-scanner-cli,
-#                 see Makefile variable DOCKERSONAR)
+#                 see Makefile variable DOCKERSONAR
+#                 ATTENTION: make sure to allocate at least 4GB RAM in the 
+#                 Docker resource configuration when running sonar server 
+#                 and sonar scanner containers simulataneously)
 # leading dash (in front of commands, not parameters) ignores error codes,
 # `make` would fail if test case fails or linter reports infos/warnings/errors.
 # check SETUPTOOLSFILES since setuptools is used to generate PACKAGE / NAME

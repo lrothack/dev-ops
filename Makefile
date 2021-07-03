@@ -175,7 +175,7 @@ lint: $(SETUPTOOLSFILES) $(PACKAGE)
 # --- SonarQube targets ---
 
 ## sonar:        Report code analysis and test coverage results to SonarQube
-##               (requires SonarQube server, to run in Docker:
+##               (requires SonarQube server, to run server in Docker:
 ##                `docker-compose -p sonarqube \
 ##                                -f sonarqube/docker-compose.yml up -d`)
 #                (requires code analysis dependencies, 

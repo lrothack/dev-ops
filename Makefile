@@ -79,21 +79,26 @@ DOCKERFILES = Dockerfile entrypoint.sh
 #
 # Authentication
 SONARTOKEN=<auth_token>
-# Report to sonar URL (running sonar-scanner locally)
-SONARURL=http://localhost:9000
-# Local sonar-scanner installation (sonar-scanner must be the PATH)
-SONARSCANNER = sonar-scanner
-# Use Docker image with sonar-scanner installation
-DOCKERSONAR=True
-# Report to sonar URL (running sonar-scanner from Docker container)
-DOCKERSONARURL=http://sonarqube:9000
+# Report to sonar URL
+SONARURL=http://sonarqube:9000
+# DISABLE/enable whether to include SCM (git) meta info in sonarqube report
+SONARNOSCM=False
+# Connect sonar-scanner Docker container to Docker network
 DOCKERNET=sonarqube_net
-DOCKERSONARSCANNER = $(DOCKER) run \
+# Docker command for running sonar-scanner container
+# make sure to allocate at least 4GB RAM in the Docker resource config
+# if SonarQube server and SonarScanner are running simultaneously
+SONARSCANNER=$(DOCKER) run \
     --network=$(DOCKERNET) \
     --rm -v $(CWD):/usr/src \
     sonarsource/sonar-scanner-cli:4.6
-# DISABLE/enable whether to include SCM (git) meta info in sonarqube report
-SONARNOSCM=False
+#
+# Local sonar-scanner installation
+#
+# Report to sonar URL
+# SONARURL=http://localhost:9000
+# Path to executable or name of executable if on PATH
+# SONARSCANNER=sonar-scanner
 
 
 # --- Common targets ---
@@ -179,10 +184,7 @@ lint: $(SETUPTOOLSFILES) $(PACKAGE)
 ##                `docker-compose -p sonarqube \
 ##                                -f sonarqube/docker-compose.yml up -d`)
 #                (requires code analysis dependencies, 
-#                 intall with `make install-dev`)
-#                (requires SonarQube client sonar-scanner on PATH or 
-#                 Docker image sonarsource/sonar-scanner-cli,
-#                 see Makefile variable DOCKERSONAR
+#                 intall with `make install-dev`
 #                 ATTENTION: make sure to allocate at least 4GB RAM in the 
 #                 Docker resource configuration when running sonar server 
 #                 and sonar scanner containers simulataneously)
@@ -195,10 +197,6 @@ sonar: $(SETUPTOOLSFILES) $(PACKAGE) $(TESTS)
 	$(PYLINT) $(PACKAGE) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $(PYLINTREP)
 	-$(COVERAGE) run --source $(PACKAGE) -m $(PYTEST) --junit-xml=$(PYTESTREP) -o junit_family=xunit2 $(TESTS)
 	$(COVERAGE) xml -o $(COVERAGEREP)
-ifeq ($(DOCKERSONAR), True)
-	$(eval SONARSCANNER:=$(DOCKERSONARSCANNER))
-	$(eval SONARURL:=$(DOCKERSONARURL))
-endif
 	$(SONARSCANNER) -Dsonar.host.url=$(SONARURL) \
               -Dsonar.login=$(SONARTOKEN) \
               -Dsonar.projectKey=$(NAME) \

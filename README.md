@@ -1,4 +1,3 @@
-
 # Python DevOps Template
 
 This project is intended to be used as a template in order to set up a simple dev-ops pipeline for your Python code.
@@ -7,9 +6,10 @@ Features:
 
 - [Project structure following common conventions](#python-project-structure)
 - [Setting up a development environment with setuptools](#development-environment)
-- [Running code analyses and reporting results to SonarQube](#reporting-to-sonarqube)
+- [Running code analyses (linting and testing)](#code-analyses)
 - [Build a Python wheel package with setuptools](#build-python-wheel)
 - [Implementing this process in a multi-stage Docker build](#build-docker-image)
+- [Reporting results to SonarQube](#reporting-to-sonarqube)
 - [Easily adapt the template for your own project](#adapt-this-template-for-your-project)
 
 These use cases are accessible through a `Makefile`. A summary of the most important make targets can be obtained by running
@@ -64,9 +64,25 @@ make install-dev
 sampleproject --help
 ```
 
+## Code analyses
+
+Run code analyses in your local Python development environment.
+
+Prerequisites:
+
+- Current working directory `dev-ops`
+- [Installed development environment and activated virtual environment](#development-environment)
+
+```bash
+# run linters
+make lint
+# run unit tests
+make test
+```
+
 ## Reporting to SonarQube
 
-Start a SonarQube server, run code analysis in your local Python development environment and report the results to SonarQube.
+Start a SonarQube server. Run code analyses and report analysis results to SonarQube.
 
 Prerequisites:
 
@@ -77,8 +93,17 @@ Prerequisites:
 # start SonarQube Server
 docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d
 # wait until SonarQube has started at http://localhost:9000
+```
+
+- Configure SonarQube through the web interface. Go to *Administration - Security - Users* and click *Update Tokens* in the *Tokens* column for a chosen user in order to generate an authentication token.
+- Configure `Makefile` by assigning the `Makefile` variable `SONARTOKEN` to the authentication token you just generated. You can configure to use a different SonarQube server with the variable `SONARURL`.
+- Note that you can also define the variables on the command-line instead of editing the `Makefile`.
+
+```bash
 # run code analyses and report to SonarQube
 make sonar
+# in order to specify configuration variables run
+# make sonar SONARURL=<url> SONARTOKEN=<token>
 ```
 
 More details on how to set up a SonarQube server in a dockerized environment can be found [here](sonarqube/).
@@ -105,34 +130,29 @@ More details on Python packaging can be found [here](docs/).
 
 ## Build Docker image
 
-Build a Docker image in two stages. The first stage runs unit tests, code analyses, (optionally) reports results to SonarQube and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
+Build a Docker image in two stages. The first stage runs unit tests, code analyses and builds a Python wheel package. The second stage installs the wheel from the first stage and is ready for deployment.
 
 Notes:
 
 - The build process in the first stage as well as the runtime environment in the second stage are independent from your local development environment.
-- Reporting analysis results to SonarQube in the first stage is disabled by default and can be enabled with make argument `DOCKERSONAR=True`.
+- Code analysis results are shown after the Docker build is finished.
 
 Prerequisites:
 
 - Current working directory `dev-ops`
-- [SonarQube server is running](#reporting-to-sonarqube) (only if `DOCKERSONAR=True`)
 
 ```bash
-# build the Docker image without reporting to SonarQube
+# build the Docker image
 make docker-build
-# alternatively the Docker image can be built with reporting to SonarQube
-make docker-build DOCKERSONAR=True
 # run container
 docker run --rm sampleproject
 ```
-
-Reporting to SonarQube within the two-stage build process, requires an active Docker network during the build. This is unsupported with BuildKit.
 
 More details on Docker deployment can be found [here](docs/).
 
 ## Adapt this template for your project
 
-If you are fine with the conventions that have been followed in the template, you can easily adapt the template for your own project.
+You can easily adapt the template for your own project.
 
 ### Command-line tools
 
@@ -148,12 +168,13 @@ If you are fine with the conventions that have been followed in the template, yo
 - Put your executable Python scripts in the [`scripts`](scripts/) directory. Not required necessarily because you can define entry points based on Python functions in [`setup.py`](setup.py).
 - Change [`setup.py`](setup.py) to your needs.
   - Change the `name` to `<name>`. Important: The name must match the name of the top-level import directory.
-  - Define the package sources. `find_packages` will recursively search the `include` directory, i.e., the top-level import directory.
+  - Define the package sources. `find_packages` will search the `include` directories, i.e., the top-level import directory and sub-directories according to wildcards.
   - Define your (executable) entry points with `scripts` and/or `entry_points`. Important: One executable must be called `<name>` ([see below](#docker-entrypoint)).
   - Add package dependencies with `install_requires`.
   - Add additional (non source) files in `package_data` as needed.
   - Set package meta data, like license, author, etc.
   - Change development dependencies in `extras_require` as needed or define additional build targets.
+- Change the variables in the *configuration* sections of [`Makefile`](Makefile) to your needs.
 - Change [`Dockerfile`](Dockerfile) to your needs. This should be uncommon since the definitions/configurations are rather generic.
   - Change the `ENTRYPOINT` / `CMD` definition. Set the definition according to your own defaults (scripts/executables).
   - Change the runtime environment. The application is currently run as user `user` in working directory `/home/user/app`.

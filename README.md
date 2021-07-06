@@ -86,6 +86,7 @@ Start a SonarQube server. Run code analyses and report analysis results to Sonar
 
 Prerequisites:
 
+- Allocate at least 4GB RAM in the Docker resource configuration
 - Current working directory `dev-ops`
 - [Installed development environment and activated virtual environment](#development-environment)
 

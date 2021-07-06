@@ -120,41 +120,18 @@ Documentation:
 ## Build Docker image for deployment
 
 The [Dockerfile](../Dockerfile) implements a multi-stage Docker image build for
-running unit tests, code coverage, code analysis, SonarQube reporting,
+running unit tests, code coverage, code analysis,
 building a Python wheel in a first stage as well as installing the wheel in a
 minimal image within the second stage. The Dockerfile implements the steps which
 are explained [above](#build-pip-package-for-deployment).
 
-1. For reporting analyses to SonarQube, the `sonarqube` [container](../sonarqube/) must be running and must be connected to the same Docker network, which will be used in the Docker image build below. If you have started the `sonarqube` container with `docker run`, set up the corresponding Docker network:
+1. Start the build process:
 
    ```bash
-   docker network create sonarqube_net
-   docker network connect sonarqube_net sonarqube
-   ```
-
-   **Note**: If you have been using `docker-compose` the network is managed in [docker-compose.yml](../sonarqube/docker-compose.yml) and should already exist. Check with
-
-   ```bash
-   docker network ls
-   ```
-
-   You can check if the managed containers are connected to the network with `docker container inspect`.
-2. The build process for sampleproject will be triggered within the `sonarqube_net` network:
-
-   ```bash
-   docker build --rm --network=sonarqube_net -t sampleproject .
-   # alternatively run the command with make (see Makefile):
    make docker-build
    ```
 
-   Notes:
-    - `--rm` flag removes intermediate containers (also useful with `docker run`)
-    - `--network` specifies the name of the Docker network for building the image
-    - `-t sampleproject` specifies the name of the tag that can be used to refer to the image
-    - `.` refers to the current directory where Docker expects a `Dockerfile`
-    - This example assumes that the current directory is (typically) the root of your git repository and, therefore, ignores the .git directory (see [.dockerignore](../.dockerignore)). The repository itself should not be copied to the image for building. Consequently, the SonarQube version control support is disabled when reporting results, see flag used in [Dockerfile](../Dockerfile) when calling the [Makefile](../Makefile) with `make`.
-
-3. Run the newly built image by (implicitly) creating a container:
+2. Run the newly built image by (implicitly) creating a container:
 
    ```bash
    docker run --rm sampleproject
@@ -170,7 +147,7 @@ are explained [above](#build-pip-package-for-deployment).
       docker run --rm sampleproject 45 46
       ```
 
-4. In order to obtain the wheel that was built in the build process, copy the `dist` directory from the container to a local directory, here `dist_sampleproject_container`:
+3. In order to obtain the wheel that was built in the build process, copy the `dist` directory from the container to a local directory, here `dist_sampleproject_container`:
 
    ```bash
    # Create a container

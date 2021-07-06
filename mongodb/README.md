@@ -36,3 +36,4 @@ docker-compose down
     Note: Due to the persistent volume, your entries should not be lost after stopping and starting the container.
 
 **Important**: The json-style entries are not intended for storing binary data. Use the Python [gridfs](https://api.mongodb.com/python/current/api/gridfs/index.html#module-gridfs) API for this purpose.
+

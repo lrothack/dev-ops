@@ -157,3 +157,4 @@ To deactivate the `venv` after testing the container run: `deactivate`.
     ```bash
     docker stop sonarqube
     ```
+

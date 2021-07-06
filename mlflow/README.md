@@ -46,3 +46,4 @@ docker-compose down
 
 3. Go to [http://localhost:5000](http://localhost:5000) and you should see the logged experiment data including the artifact within the `random-test` experiment.
 4. Go to [http://localhost:9001](http://localhost:9001) and you should see the artifact within the `mlflow` bucket.
+

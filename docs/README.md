@@ -22,27 +22,28 @@ Do not forget to disable to switch back to your system environment by running th
 
 ### Setup development environment
 
-An important advantage of packaging your app with `setup.py` (pip) in contrast to specifying your app's dependencies
-in the `requirements.txt` file only, is that pip will automatically link your application
-sources in the `PYTHONPATH`.
-Since your dependencies will automatically be installed in the
+An important advantage of packaging your app with `setup.py` (pip), in contrast to specifying your app's dependencies in the `requirements.txt` file *only*, is that pip will automatically link your application sources in the `PYTHONPATH`. Since your dependencies will automatically be installed in the
 `PYTHONPATH`, you do not have to manually manage the `PYTHONPATH` anymore.
 
+- Define package dependencies in `requirements.txt`.
+- `setup.py` installs package dependencies along with development dependencies.
+
 ```bash
-pip install -r requirements.txt
-# alternatively run the command with make (see Makefile):
+# installs the package in development mode (package dependencies and development dependencies)
 make install-dev
+# installs package dependencies only (for a source code deployment of the package in production)
+pip install -r requirements.txt
 ```
 
 Important:
 
-`requirements.txt` refers to `setup.py` which is expected to be
-found in the current working directory. Thus, you can manage your dependencies in a single place.
+`setup.py` loads package dependencies from `requirements.txt` which is expected to be
+found in the current working directory.
 
-[requirements.txt](../requirements.txt):
+`make install-dev`:
 
 ```bash
--e .[dev]
+pip install -e .[dev]
 ```
 
 Notes:
@@ -53,8 +54,15 @@ Notes:
 - `.`: The dot refers to the current working directory where the `setup.py` file is expected.
 - `[dev]`: Refers to the `dev` variant/environment of the package which is defined in `setup.py` (see `extras_require`).
 
-The full discussion on how to use `setup.py` together with `requirements.txt`
-is found on [stackoverflow](https://stackoverflow.com/questions/14399534/reference-requirements-txt-for-the-install-requires-kwarg-in-setuptools-setup-py/19081268#19081268)
+Discussions on how to use `setup.py` and `requirements.txt` are found on:
+
+- [stackoverflow](https://stackoverflow.com/questions/14399534/reference-requirements-txt-for-the-install-requires-kwarg-in-setuptools-setup-py)
+- [Python Packaging User Guide](https://packaging.python.org/discussions/install-requires-vs-requirements/)
+
+Note: Python package deployments that do not use `setup.py` typically define dependencies with `requirements.txt` only. The approach described above
+
+- is fully compatible with projects that only use `requirements.txt` for dependency management,
+- separates production dependencies from development dependencies.
 
 ### Build pip package for deployment
 
@@ -65,9 +73,9 @@ easily be installed in any (virtual) Python environment. The package contents an
 1. After switching to your virtual Python environment build the (binary) wheel (current working directory `dev-ops/`):
 
    ```bash
-   python setup.py bdist_wheel
-   # alternatively run the command with make (see Makefile):
    make dist
+   # executes the setuptools `bdist_wheel` command (see Makefile):
+   # python setup.py bdist_wheel
    ```
 
    Notes on [`setup.py`](../setup.py) (project specific):
@@ -76,7 +84,7 @@ easily be installed in any (virtual) Python environment. The package contents an
     - `packages`: Defines how to include/exclude Python import packages. Can be specified manually or with [find_packages](https://setuptools.readthedocs.io/en/latest/setuptools.html#using-find-packages). Projects using an `src` directory ([bad practice](https://docs.python-guide.org/writing/structure/#the-actual-module)) can *include* the `src` directory only. Otherwise, you have to *exclude* everything you do not want to ship with your deployment package.
     - `scripts`: Provides executables for accessing the functionalities provided by the package. Executables are automatically installed on the `PATH`.
     - `entry_points`: Automatically generate executables by Python package.module:function. Executables are installed on the `PATH`.
-    - `install_requires`: Python package dependencies (corresponds to definitions in `requirements.txt`, `requirements.txt` refers to `setup.py` in order to avoid [redundancies](https://stackoverflow.com/questions/14399534/reference-requirements-txt-for-the-install-requires-kwarg-in-setuptools-setup-py/19081268#19081268)).
+    - `install_requires`: Python package dependencies (loads definitions from `requirements.txt`).
     - `package_data`: Non-python files that should be included in the package have to be declared specifically. Further inclusion patterns can be defined in `MANIFEST.in`.
 
    Notes on [`setup.py`](../setup.py) (common to most dev-ops template projects):

@@ -33,7 +33,7 @@ The project structure follows ideas discussed on [stackoverflow](https://stackov
 - Use a [`MANIFEST.in`](MANIFEST.in) file for advanced pip package build directives.
 - Use a [`LICENSE`](LICENSE) for defining users' rights and obligations.
 - Don't use an `src` directory (redundant) but a top-level Python import package (here [`sampleproject`](sampleproject/) directory).
-- Use a [`tests`](tests/) directory for unit tests (directory is a Python import package).
+- Use a [`tests`](tests/) directory for unit tests.
 - Use a [`scripts`](scripts/) directory for storing scripts that are directly executable.
 - Use a [`Makefile`](Makefile) for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview).
 - Use a [`Dockerfile`](Dockerfile) that defines how to build and deploy the app in a container.

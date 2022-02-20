@@ -82,4 +82,4 @@ ENTRYPOINT ["bash", "./entrypoint.sh"]
 # Important: both entrypoint and cmd have to be specified in json style
 # --> json style allows for better CLI interoperability when running the 
 # container. Most importantly users can provide command-line arguments for
-# the entrypoint script. 
+# the entrypoint script.

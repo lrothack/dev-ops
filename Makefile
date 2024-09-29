@@ -31,7 +31,7 @@ PIP = pip
 # Adjust the list when your configuration changes, e.g., you use additional
 # files one of the files is not used anymore.
 BUILDTOOLSFILES = pyproject.toml meta.py
-# Files that contain package metadata, adding */__init__.py since top-level init
+# Files that contain package metadata, adding */__init__.py since top-level __init__.py
 # file contains version information (-> for reinstalling package if metadata changes)
 METADATAFILES = pyproject.toml $(wildcard */__init__.py)
 #
@@ -178,7 +178,7 @@ install-dev $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
 
 ## test:         Run Python unit tests with pytest and analyse coverage
 # check EGGINFO that is required for PACKAGE name discovery
-test: $(BUILDTOOLSFILES) $(EGGINFO) $(PACKAGE) $(TESTS)
+test: $(EGGINFO) $(PACKAGE) $(TESTS)
 	@echo "\n\nUnit Tests with Coverage\n------------------------\n"
 	$(PYTEST) --cov=$(PACKAGE) $(TESTS)
 

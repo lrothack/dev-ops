@@ -1,4 +1,4 @@
-FROM python:3.12-slim as build
+FROM python:3.12-slim AS build
 # The python base image contains python, pip, etc. in a slim Debian buster 
 
 # Variables defined with ARG can be modified when building the Docker image

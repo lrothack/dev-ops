@@ -6,10 +6,10 @@ Start SonarQube server in a Docker container and report Python code analyses:
 1. Start SonarQube server:
 
     ```bash
-    docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d
+    docker compose -p sonarqube -f sonarqube/docker-compose.yml up -d
     ```
 
-2. Login at `http://localhost:9000`, set a new password and generate/copy an authentication token (*Administration - Users*).
+2. Login at `http://localhost:9000` (initial user/password is `admin`/`admin`), set a new password and generate/copy an authentication token (*Administration - Users*).
 
 3. Store the authentication token in the local file `.sonartoken`. The token is read in [`Makefile`](../Makefile) and stored in the `SONARTOKEN` variable.
 
@@ -23,10 +23,10 @@ Below you will find a detailed description on how to use [SonarQube with Docker]
 
 ## Setting up SonarQube server with PostgreSQL
 
-1. Multiple docker containers can be run with `docker-compose` (current working directory: `./sonarqube`):
+1. Multiple docker containers can be run with `docker compose` (current working directory: `./sonarqube`):
 
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
    Notes:

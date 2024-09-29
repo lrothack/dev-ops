@@ -195,7 +195,7 @@ lint: $(EGGINFO) $(PACKAGE)
 
 ## sonar:        Report code analysis and test coverage results to SonarQube
 ##               (requires SonarQube server, to run server in Docker:
-##                `docker-compose -p sonarqube \
+##                `docker compose -p sonarqube \
 ##                                -f sonarqube/docker-compose.yml up -d`)
 #                (requires code analysis dependencies, 
 #                 intall with `make install-dev`
@@ -212,7 +212,7 @@ sonar: $(EGGINFO) $(PACKAGE) $(TESTS)
 	-$(COVERAGE) run --source $(PACKAGE) -m $(PYTEST) --junit-xml=$(PYTESTREP) -o junit_family=xunit2 $(TESTS)
 	$(COVERAGE) xml -o $(COVERAGEREP)
 	$(SONARSCANNER) -Dsonar.host.url=$(SONARURL) \
-              -Dsonar.login=$(SONARTOKEN) \
+              -Dsonar.token=$(SONARTOKEN) \
               -Dsonar.projectKey=$(NAME) \
               -Dsonar.projectVersion=$(VERSION) \
               -Dsonar.sourceEncoding=UTF-8 \

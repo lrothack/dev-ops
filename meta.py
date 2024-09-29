@@ -15,6 +15,16 @@ logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 
 
+class DistributionNotFoundError(ValueError):
+    """Indicates that the distribution installed in the current working directory could
+    not be retrieved. This is likely due to one of the following reasons:
+
+    - No distribution has been installed in the current working directory.
+    - More than one distribution could be found in the context of the current working
+      directory.
+    """
+
+
 class OrderedStoreTrueAction(argparse.Action):
     """Defines argparse action which behaves like store_true and saves the order
     of all OrderedStoreTrueActions which have been provided in the command-line
@@ -153,7 +163,7 @@ def parse_args(args_list: Optional[list[str]]) -> argparse.Namespace:
         LOGGER.setLevel(logging.DEBUG)
         LOGGER.debug("%s:: %s\n", platform.node(), " ".join(sys.argv))
     elif args_ns.quiet:
-        LOGGER.setLevel(logging.WARNING)
+        LOGGER.setLevel(logging.FATAL)
 
     return args_ns
 
@@ -164,8 +174,8 @@ def distribution_name() -> str:
 
     Raises
     ------
-    ValueError
-        if no or more than one Python distribution have been found in the current
+    DistributionNotFoundError
+        If no or more than one Python distribution have been found in the current
         working directory.
     """
     distribution_name_list = []
@@ -176,7 +186,10 @@ def distribution_name() -> str:
             distribution_name_list.append(dist.name)
     if len(distribution_name_list) == 1:
         return distribution_name_list[0]
-    raise ValueError(f"Could not determine distribution name: {distribution_name_list}")
+    raise DistributionNotFoundError(
+        "Could not determine distribution name. "
+        f"Distributions: {distribution_name_list}"
+    )
 
 
 def distribution_version(_distribution_name) -> str:
@@ -193,14 +206,17 @@ def main(args_list: Optional[list[str]] = None) -> None:
     # Start application according to parsing result in args_ns
 
     if args_ns.name or args_ns.version:
-        _distribution_name = distribution_name()
-        lines = []
-        for opt_arg in getattr(args_ns, OrderedStoreTrueAction.ARGS_NS_KEY):
-            if opt_arg == "name":
-                lines.append(_distribution_name)
-            if opt_arg == "version":
-                lines.append(distribution_version(_distribution_name))
-        sys.stdout.write("\n".join(lines) + "\n")
+        try:
+            _distribution_name = distribution_name()
+            lines = []
+            for opt_arg in getattr(args_ns, OrderedStoreTrueAction.ARGS_NS_KEY):
+                if opt_arg == "name":
+                    lines.append(_distribution_name)
+                if opt_arg == "version":
+                    lines.append(distribution_version(_distribution_name))
+            sys.stdout.write("\n".join(lines) + "\n")
+        except DistributionNotFoundError as err:
+            LOGGER.error(err)
 
 
 if __name__ == "__main__":

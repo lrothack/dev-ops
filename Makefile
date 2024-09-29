@@ -31,6 +31,9 @@ PIP = pip
 # Adjust the list when your configuration changes, e.g., you use additional
 # files one of the files is not used anymore.
 BUILDTOOLSFILES = pyproject.toml meta.py
+# Files that contain package metadata, adding */__init__.py since top-level init
+# file contains version information (-> for reinstalling package if metadata changes)
+METADATAFILES = pyproject.toml $(wildcard */__init__.py)
 #
 # Obtain Python package path, name and version
 # Lazy variable evualtion (with a single '=') is used in order to evaluate
@@ -38,11 +41,13 @@ BUILDTOOLSFILES = pyproject.toml meta.py
 # are present *before* executing the shell commands. 
 #
 # Name of the application defined via pyproject.toml
-NAME=$(shell $(PYTHON) meta.py --name)
+NAME=$(shell $(PYTHON) meta.py --quiet --name)
 # Version of the application defined via pyproject.toml
-VERSION=$(shell $(PYTHON) meta.py --version)
+VERSION=$(shell $(PYTHON) meta.py --quiet --version)
 # Name of the directory where application sources are located
 PACKAGE=./$(NAME)
+# Directory where metadata for the installed package is found
+EGGINFO=$(PACKAGE).egg-info
 # Directory where unittests are located
 TESTS=./tests
 
@@ -99,7 +104,7 @@ DOCKERNET=sonarqube_net
 SONARSCANNER=$(DOCKER) run \
     --network=$(DOCKERNET) \
     --rm -v $(CWD):/usr/src \
-    sonarsource/sonar-scanner-cli:4.6
+    sonarsource/sonar-scanner-cli:10
 #
 # Local sonar-scanner installation
 #
@@ -165,18 +170,21 @@ build: $(BUILDTOOLSFILES)
 ##               (installation within a Python virtual environment is
 ##                recommended)
 ##               (application sources will be symlinked to PYTHONPATH)
-install-dev: $(BUILDTOOLSFILES)
+# along with PHONY target `install-dev` the rule generates the $(EGGINFO) directory
+# this distribution specification should be rebuilt whenever any package metadata changes
+# -> an updated $(EGGINFO) is required for successfull package name/version discovery
+install-dev $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
 	$(PIP) install -e ".[dev]"
 
 ## test:         Run Python unit tests with pytest and analyse coverage
-# check BUILDTOOLSFILES that are required for PACKAGE name discovery
-test: $(BUILDTOOLSFILES) $(PACKAGE) $(TESTS)
+# check EGGINFO that is required for PACKAGE name discovery
+test: $(BUILDTOOLSFILES) $(EGGINFO) $(PACKAGE) $(TESTS)
 	@echo "\n\nUnit Tests with Coverage\n------------------------\n"
 	$(PYTEST) --cov=$(PACKAGE) $(TESTS)
 
 ## lint:         Run Python linter (bandit, pylint) and print output to terminal
-# check BUILDTOOLSFILES that are required for PACKAGE name discovery
-lint: $(BUILDTOOLSFILES) $(PACKAGE)
+# check EGGINFO that is required for PACKAGE name discovery
+lint: $(EGGINFO) $(PACKAGE)
 	@echo "\n\nBandit Vulnerabilities\n----------------------\n"
 	-$(BANDIT) -r $(PACKAGE)
 	@echo "\n\nPylint Code Analysis\n--------------------\n"
@@ -196,8 +204,8 @@ lint: $(BUILDTOOLSFILES) $(PACKAGE)
 #                 and sonar scanner containers simulataneously)
 # leading dash (in front of commands, not parameters) ignores error codes,
 # `make` would fail if test case fails or linter reports infos/warnings/errors.
-# check BUILDTOOLSFILES that are required for PACKAGE NAME discovery
-sonar: $(BUILDTOOLSFILES) $(PACKAGE) $(TESTS)
+# check EGGINFO that is required for PACKAGE name discovery
+sonar: $(EGGINFO) $(PACKAGE) $(TESTS)
 	@mkdir -p $(REPDIR)
 	-$(BANDIT) -r $(PACKAGE) --format json >$(BANDITREP)
 	$(PYLINT) $(PACKAGE) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $(PYLINTREP)
@@ -222,8 +230,8 @@ sonar: $(BUILDTOOLSFILES) $(PACKAGE) $(TESTS)
 ## docker-build: Build docker image for Python application with code analysis
 # Note: info is parsed and immediately printed by make, echo is executed in a
 # shell as are the other commands in the recipe.
-# check BUILDTOOLSFILES that are required for package NAME discovery
-docker-build: $(BUILDTOOLSFILES) $(DOCKERFILES)
+# check EGGINFO that is required for package NAME discovery
+docker-build: $(EGGINFO) $(DOCKERFILES)
 	$(info Running Docker build in context: ./ )
 	$(info ENTRYPOINT executable: $(DOCKERENTRYPOINTEXEC))
 	$(eval REPORTFILE:=code-analyses.txt)
@@ -236,6 +244,6 @@ docker-build: $(BUILDTOOLSFILES) $(DOCKERFILES)
 
 ## docker-tag:   Tag the 'latest' image created with `make docker-build` with
 ##               the current version that is defined via pyproject.toml
-# check BUILDTOOLSFILES that are required for package NAME and VERSION discovery
-docker-tag: $(BUILDTOOLSFILES)
+# check EGGINFO that is required for package NAME and VERSION discovery
+docker-tag: $(EGGINFO)
 	$(DOCKER) tag $(NAME) $(NAME):$(VERSION)

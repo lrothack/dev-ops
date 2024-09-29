@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster as build
+FROM python:3.12-slim as build
 # The python base image contains python, pip, etc. in a slim Debian buster 
 
 # Variables defined with ARG can be modified when building the Docker image
@@ -28,11 +28,11 @@ RUN make clean-all && \
     make test >>${REPORTFILE}
 
 # Use Makefile in order to build a Python wheel from the app
-RUN make clean-all && make dist
+RUN make clean-all && make build
 
 # Start a new stage for the deployment image in order to minimize image size
 # --> libs for code analysis are not required in the final image
-FROM python:3.8-slim-buster
+FROM python:3.12-slim
 
 # Define value of ENTRYPOINT environment variable with build-arg ENTRYPOINT.
 # The environment variable will be available within the Docker container.

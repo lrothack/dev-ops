@@ -25,22 +25,22 @@ MKFILE_PATH := $(lastword $(MAKEFILE_LIST))
 # Define names of executables used in make targets (and variables)
 PYTHON = python
 PIP = pip
-# Files required by setuptools (python setup.py, pip)
-# Note that setuptools can only supports running from the project root
-# --> SETUPTOOLSFILES must be present in the working directory
+# Files required by `python build` (pip, name/version discovery)
+# Note that building is only supported from the project root
+# --> BUILDTOOLSFILES must be present in the working directory
 # Adjust the list when your configuration changes, e.g., you use additional
 # files one of the files is not used anymore.
-SETUPTOOLSFILES = setup.py requirements.txt
+BUILDTOOLSFILES = pyproject.toml meta.py
 #
 # Obtain Python package path, name and version
 # Lazy variable evualtion (with a single '=') is used in order to evaluate
-# variables only from inside make targets. This allows to check if SETUPTOOLSFILES
+# variables only from inside make targets. This allows to check if BUILDTOOLSFILES
 # are present *before* executing the shell commands. 
 #
-# Name of the application defined in setup.py
-NAME=$(shell $(PYTHON) setup.py --name)
-# Version of the application defined in setup.py
-VERSION=$(shell $(PYTHON) setup.py --version)
+# Name of the application defined via pyproject.toml
+NAME=$(shell $(PYTHON) meta.py --name)
+# Version of the application defined via pyproject.toml
+VERSION=$(shell $(PYTHON) meta.py --version)
 # Name of the directory where application sources are located
 PACKAGE=./$(NAME)
 # Directory where unittests are located
@@ -111,7 +111,7 @@ SONARSCANNER=$(DOCKER) run \
 
 # --- Common targets ---
 
-.PHONY: help clean clean-all dist install-dev test lint sonar docker-build docker-tag
+.PHONY: help clean clean-all build install-dev test lint sonar docker-build docker-tag
 
 ## 
 ## MAKEFILE for building and testing Python package including
@@ -152,34 +152,31 @@ $(PACKAGE):
 # Check if test files exist in current working directory, otherwise stop.
 $(TESTS):
 	$(error "Python test files missing in working directory ($@)")
-# Check if setuptools files exist in current working directory, otherwise stop.
-$(SETUPTOOLSFILES):
+# Check if files for building exist in current working directory, otherwise stop.
+$(BUILDTOOLSFILES):
 	$(error "Python packaging files missing in working directory ($@)")
 
-## dist:         Build a Python wheel with setuptools (based on setup.py)
-dist: $(SETUPTOOLSFILES)
-	$(PYTHON) setup.py sdist
-	$(PYTHON) setup.py bdist_wheel
+## build:         Build a Python wheel with `python build` (based on pyproject.toml)
+build: $(BUILDTOOLSFILES)
+	$(PIP) install build
+	$(PYTHON) -m build
 
-## install-dev:  Install development dependencies (based on setup.py)
+## install-dev:  Install development dependencies (based on pyproject.toml)
 ##               (installation within a Python virtual environment is
 ##                recommended)
 ##               (application sources will be symlinked to PYTHONPATH)
-install-dev: $(SETUPTOOLSFILES)
-	$(PIP) install wheel
-	$(PIP) install -e .[dev]
+install-dev: $(BUILDTOOLSFILES)
+	$(PIP) install -e ".[dev]"
 
 ## test:         Run Python unit tests with pytest and analyse coverage
-# check SETUPTOOLSFILES since setuptools is used to generate the PACKAGE name
-test: $(SETUPTOOLSFILES) $(PACKAGE) $(TESTS)
-	@echo "\n\nUnit Tests\n----------\n"
-	$(COVERAGE) run --source $(PACKAGE) -m $(PYTEST) $(TESTS)
-	@echo "\n\nUnit Test Code Coverage\n-----------------------\n"
-	$(COVERAGE) report -m
+# check BUILDTOOLSFILES that are required for PACKAGE name discovery
+test: $(BUILDTOOLSFILES) $(PACKAGE) $(TESTS)
+	@echo "\n\nUnit Tests with Coverage\n------------------------\n"
+	$(PYTEST) --cov=$(PACKAGE) $(TESTS)
 
 ## lint:         Run Python linter (bandit, pylint) and print output to terminal
-# check SETUPTOOLSFILES since setuptools is used to generate the PACKAGE name
-lint: $(SETUPTOOLSFILES) $(PACKAGE)
+# check BUILDTOOLSFILES that are required for PACKAGE name discovery
+lint: $(BUILDTOOLSFILES) $(PACKAGE)
 	@echo "\n\nBandit Vulnerabilities\n----------------------\n"
 	-$(BANDIT) -r $(PACKAGE)
 	@echo "\n\nPylint Code Analysis\n--------------------\n"
@@ -199,8 +196,8 @@ lint: $(SETUPTOOLSFILES) $(PACKAGE)
 #                 and sonar scanner containers simulataneously)
 # leading dash (in front of commands, not parameters) ignores error codes,
 # `make` would fail if test case fails or linter reports infos/warnings/errors.
-# check SETUPTOOLSFILES since setuptools is used to generate PACKAGE / NAME
-sonar: $(SETUPTOOLSFILES) $(PACKAGE) $(TESTS)
+# check BUILDTOOLSFILES that are required for PACKAGE NAME discovery
+sonar: $(BUILDTOOLSFILES) $(PACKAGE) $(TESTS)
 	@mkdir -p $(REPDIR)
 	-$(BANDIT) -r $(PACKAGE) --format json >$(BANDITREP)
 	$(PYLINT) $(PACKAGE) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $(PYLINTREP)
@@ -225,8 +222,8 @@ sonar: $(SETUPTOOLSFILES) $(PACKAGE) $(TESTS)
 ## docker-build: Build docker image for Python application with code analysis
 # Note: info is parsed and immediately printed by make, echo is executed in a
 # shell as are the other commands in the recipe.
-# check SETUPTOOLSFILES since setuptools is used to generate the package NAME
-docker-build: $(SETUPTOOLSFILES) $(DOCKERFILES)
+# check BUILDTOOLSFILES that are required for package NAME discovery
+docker-build: $(BUILDTOOLSFILES) $(DOCKERFILES)
 	$(info Running Docker build in context: ./ )
 	$(info ENTRYPOINT executable: $(DOCKERENTRYPOINTEXEC))
 	$(eval REPORTFILE:=code-analyses.txt)
@@ -238,7 +235,7 @@ docker-build: $(SETUPTOOLSFILES) $(DOCKERFILES)
 	@echo "\n\nbuild finished, run the container with \`docker run --rm $(NAME)\`"
 
 ## docker-tag:   Tag the 'latest' image created with `make docker-build` with
-##               the current version that is defined in setup.cfg/setup.py
-# check SETUPTOOLSFILES since setuptools is used to generate NAME and VERSION
-docker-tag: $(SETUPTOOLSFILES)
+##               the current version that is defined via pyproject.toml
+# check BUILDTOOLSFILES that are required for package NAME and VERSION discovery
+docker-tag: $(BUILDTOOLSFILES)
 	$(DOCKER) tag $(NAME) $(NAME):$(VERSION)

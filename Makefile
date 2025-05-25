@@ -31,25 +31,26 @@ PIP = pip
 # Adjust the list when your configuration changes, e.g., you use additional
 # files one of the files is not used anymore.
 BUILDTOOLSFILES = pyproject.toml meta.py
-# Files that contain package metadata, adding */__init__.py since top-level __init__.py
-# file contains version information (-> for reinstalling package if metadata changes)
-METADATAFILES = pyproject.toml $(wildcard */__init__.py)
+#
+# Directory where sources are located
+SRC=./src
+# Directory where unit tests are located
+TESTS=./tests
 #
 # Obtain Python package path, name and version
-# Lazy variable evualtion (with a single '=') is used in order to evaluate
+# Lazy variable evaluation (with a single '=') is used in order to evaluate
 # variables only from inside make targets. This allows to check if BUILDTOOLSFILES
 # are present *before* executing the shell commands. 
 #
 # Name of the application defined via pyproject.toml
-NAME=$(shell $(PYTHON) meta.py --quiet --name)
+NAME=$(shell $(PYTHON) meta.py --quiet --egginfo-path=$(SRC) --name)
 # Version of the application defined via pyproject.toml
-VERSION=$(shell $(PYTHON) meta.py --quiet --version)
-# Name of the directory where application sources are located
-PACKAGE=./$(NAME)
+VERSION=$(shell $(PYTHON) meta.py --quiet --egginfo-path=$(SRC) --version)
 # Directory where metadata for the installed package is found
-EGGINFO=$(PACKAGE).egg-info
-# Directory where unittests are located
-TESTS=./tests
+EGGINFO=$(SRC)/$(NAME).egg-info
+# Files that contain package metadata, adding SRC*/__init__.py since top-level __init__.py
+# file contains version information (-> for reinstalling package if metadata changes)
+METADATAFILES = pyproject.toml $(wildcard $(SRC)/*/__init__.py) $(wildcard $(SRC)/*/__about__.py)
 
 
 # --- Linting/Testing configuration ---
@@ -143,17 +144,15 @@ clean-all: clean
 	@rm -rf .coverage .scannerwork
 	@rm -rf .pytest_cache
 	@rm -rf ./$(REPDIR)
-	@rm -rf ./$(NAME).egg-info
-	@rm -rf ./$(PACKAGE)/$(NAME).egg-info
-	@rm -rf build
-	@rm -rf dist
+	@rm -rf $(EGGINFO)
+	@rm -rf dist/*.whl dist/*.tar.gz
 
 
 # --- Python targets ---
 
-# Check if project files exist in current working directory, otherwise stop.
-$(PACKAGE):
-	$(error "Python project files missing in working directory ($@)")
+# Check if project source directory exists in current working directory, otherwise stop.
+$(SRC):
+	$(error "Python source directory missing in working directory ($@)")
 # Check if test files exist in current working directory, otherwise stop.
 $(TESTS):
 	$(error "Python test files missing in working directory ($@)")
@@ -161,7 +160,7 @@ $(TESTS):
 $(BUILDTOOLSFILES):
 	$(error "Python packaging files missing in working directory ($@)")
 
-## build:         Build a Python wheel with `python build` (based on pyproject.toml)
+## build:        Build a Python wheel with `python build` (based on pyproject.toml)
 build: $(BUILDTOOLSFILES)
 	$(PIP) install build
 	$(PYTHON) -m build
@@ -172,23 +171,21 @@ build: $(BUILDTOOLSFILES)
 ##               (application sources will be symlinked to PYTHONPATH)
 # along with PHONY target `install-dev` the rule generates the $(EGGINFO) directory
 # this distribution specification should be rebuilt whenever any package metadata changes
-# -> an updated $(EGGINFO) is required for successfull package name/version discovery
+# -> an updated $(EGGINFO) is required for successful package name/version discovery
 install-dev $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
 	$(PIP) install -e ".[dev]"
 
-## test:         Run Python unit tests with pytest and analyse coverage
-# check EGGINFO that is required for PACKAGE name discovery
-test: $(EGGINFO) $(PACKAGE) $(TESTS)
+## test:         Run Python unit tests with pytest and coverage analysis
+test: $(SRC) $(TESTS)
 	@echo "\n\nUnit Tests with Coverage\n------------------------\n"
-	$(PYTEST) --cov=$(PACKAGE) $(TESTS)
+	$(PYTEST) --cov=$(SRC) $(TESTS)
 
 ## lint:         Run Python linter (bandit, pylint) and print output to terminal
-# check EGGINFO that is required for PACKAGE name discovery
-lint: $(EGGINFO) $(PACKAGE)
+lint: $(SRC)
 	@echo "\n\nBandit Vulnerabilities\n----------------------\n"
-	-$(BANDIT) -r $(PACKAGE)
+	-$(BANDIT) -r $(SRC)
 	@echo "\n\nPylint Code Analysis\n--------------------\n"
-	$(PYLINT) --output-format=colorized --reports=n --exit-zero $(PACKAGE)
+	$(PYLINT) --output-format=colorized --reports=n --exit-zero $(SRC)
 
 
 # --- SonarQube targets ---
@@ -204,19 +201,19 @@ lint: $(EGGINFO) $(PACKAGE)
 #                 and sonar scanner containers simulataneously)
 # leading dash (in front of commands, not parameters) ignores error codes,
 # `make` would fail if test case fails or linter reports infos/warnings/errors.
-# check EGGINFO that is required for PACKAGE name discovery
-sonar: $(EGGINFO) $(PACKAGE) $(TESTS)
+# check EGGINFO that is required for package NAME discovery
+sonar: $(EGGINFO) $(SRC) $(TESTS)
 	@mkdir -p $(REPDIR)
-	-$(BANDIT) -r $(PACKAGE) --format json >$(BANDITREP)
-	$(PYLINT) $(PACKAGE) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $(PYLINTREP)
-	-$(COVERAGE) run --source $(PACKAGE) -m $(PYTEST) --junit-xml=$(PYTESTREP) -o junit_family=xunit2 $(TESTS)
+	-$(BANDIT) -r $(SRC) --format json >$(BANDITREP)
+	$(PYLINT) $(SRC) --exit-zero --reports=n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > $(PYLINTREP)
+	-$(COVERAGE) run --source $(SRC) -m $(PYTEST) --junit-xml=$(PYTESTREP) -o junit_family=xunit2 $(TESTS)
 	$(COVERAGE) xml -o $(COVERAGEREP)
 	$(SONARSCANNER) -Dsonar.host.url=$(SONARURL) \
               -Dsonar.token=$(SONARTOKEN) \
               -Dsonar.projectKey=$(NAME) \
               -Dsonar.projectVersion=$(VERSION) \
               -Dsonar.sourceEncoding=UTF-8 \
-              -Dsonar.sources=$(PACKAGE) \
+              -Dsonar.sources=$(SRC) \
               -Dsonar.tests=$(TESTS) \
               -Dsonar.scm.disabled=$(SONARNOSCM) \
               -Dsonar.python.xunit.reportPath=$(PYTESTREP) \

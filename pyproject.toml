@@ -1,20 +1,17 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools >= 61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-# Name of the top-level import package (directory)
-# The name must match the name of the top-level import package
-# see Makefile variable PACKAGE.
-# Naming the project as the top-level import package is also consistent with
-# conventions.
+# Name of the project / library
+# Typically, the name of the top-level import package (directory) is the slug of the
+# project name, see Makefile variable NAME.
 name = "sampleproject"
 authors = [{ name = "UNKNOWN" }]
 requires-python = ">=3.12"
-license = { file = "LICENSE" }
+license = "MIT"
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -50,8 +47,8 @@ Homepage = "https://example.com"
 #Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
-# package names should match these glob patterns (["*"] by default)
-include = ["sampleproject*"]
+# where to find sources
+where = ["src"]
 
 [tool.setuptools.dynamic]
 # The version string will be included in your Python package

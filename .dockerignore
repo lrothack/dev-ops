@@ -5,8 +5,6 @@ Dockerfile
 .scannerwork
 .codereports/
 .sonartoken
-.eggs
-*.egg-info/
 .vscode
 .git*
 sonarqube/

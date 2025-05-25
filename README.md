@@ -114,7 +114,7 @@ Prerequisites:
 
 ```bash
 # build the wheel
-make dist
+make build
 ```
 
 Test the installation of the package:

@@ -130,10 +130,15 @@ def parse_args(args_list: Optional[list[str]]) -> argparse.Namespace:
     description = "".join(
         (
             "Parse Python application name and its version from the Python ",
-            "distribution that is defined in the current working directory",
+            "distribution that is defined within the project's egg.info directory",
         )
     )
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "--egginfo-path",
+        default="./src",
+        help="Relative path (wrt project directory) to project's egg.info directory",
+    )
     parser.add_argument(
         "--name",
         action=OrderedStoreTrueAction,
@@ -168,7 +173,7 @@ def parse_args(args_list: Optional[list[str]]) -> argparse.Namespace:
     return args_ns
 
 
-def distribution_name() -> str:
+def distribution_name(egginfo_path: str) -> str:
     """Returns the name of the Python distribution that is defined in the current
     working directory.
 
@@ -179,10 +184,11 @@ def distribution_name() -> str:
         working directory.
     """
     distribution_name_list = []
-    current_path = pathlib.Path.cwd()
+    search_path = pathlib.Path.cwd() / egginfo_path
     for dist in importlib.metadata.distributions():
         dist_path = pathlib.Path(dist.locate_file(""))
-        if current_path.resolve() == dist_path.resolve():
+        LOGGER.debug(dist_path)
+        if search_path.resolve() == dist_path.resolve():
             distribution_name_list.append(dist.name)
     if len(distribution_name_list) == 1:
         return distribution_name_list[0]
@@ -207,7 +213,7 @@ def main(args_list: Optional[list[str]] = None) -> None:
 
     if args_ns.name or args_ns.version:
         try:
-            _distribution_name = distribution_name()
+            _distribution_name = distribution_name(args_ns.egginfo_path)
             lines = []
             for opt_arg in getattr(args_ns, OrderedStoreTrueAction.ARGS_NS_KEY):
                 if opt_arg == "name":

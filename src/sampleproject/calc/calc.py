@@ -1,5 +1,4 @@
-"""Implements the package.
-"""
+"""Implements the package."""
 
 import numpy as np
 

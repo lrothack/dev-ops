@@ -2,10 +2,11 @@
 application.
 """
 
-import sys
-import platform
-import logging
 import argparse
+import logging
+import platform
+import sys
+
 import sampleproject
 from sampleproject.calc import Calc
 

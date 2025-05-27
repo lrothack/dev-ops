@@ -60,6 +60,10 @@ PYTEST = pytest
 COVERAGE = coverage
 PYLINT = pylint
 BANDIT = bandit
+RUFF = ruff
+BLACK = black
+ISORT = isort
+MYPY = mypy
 # Directory where to save linting and testing reports
 REPDIR=./.codereports
 # Report result files
@@ -117,7 +121,7 @@ SONARSCANNER=$(DOCKER) run \
 
 # --- Common targets ---
 
-.PHONY: help clean clean-all build install-dev test lint sonar docker-build docker-tag
+.PHONY: help clean clean-all build install-dev test lint report check sonar docker-build docker-tag
 
 ## 
 ## MAKEFILE for building and testing Python package including
@@ -186,6 +190,19 @@ lint: $(SRC)
 	-$(BANDIT) -r $(SRC)
 	@echo "\n\nPylint Code Analysis\n--------------------\n"
 	$(PYLINT) --output-format=colorized --reports=n --exit-zero $(SRC)
+
+## report:       Combines test and lint targets in order to create a report
+report: lint test
+
+## check:        Checks test coverage, black/isort formatting, ruff linting
+##               and mypy type hints
+check: $(SRC) $(TESTS)
+	$(PYTEST) --cov=$(SRC) --cov-fail-under=80 $(TESTS)
+	$(BLACK) --check $(SRC)
+	$(RUFF) check $(SRC)
+	$(MYPY) --strict $(SRC)
+	$(ISORT) --check $(SRC)
+
 
 
 # --- SonarQube targets ---

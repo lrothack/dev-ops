@@ -26,9 +26,9 @@ dynamic = ["version", "readme"]
 [project.optional-dependencies]
 dev = [
     "bandit",
-    "black",
+    "black>=25.1.0",
     "isort",
-    "mypy",
+    "mypy>=1.15.0",
     "pytest",
     "pytest-cov",
     "pytest-mock",

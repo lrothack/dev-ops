@@ -11,7 +11,7 @@ import sampleproject
 from sampleproject.calc import Calc
 
 
-def parse_args(args_list: list[str]):
+def parse_args(args_list: list[str]) -> argparse.Namespace:
     """Parse command-line arguments
 
     Params:
@@ -53,7 +53,7 @@ def parse_args(args_list: list[str]):
     return args_ns
 
 
-def main():
+def main() -> None:
     """Entry point for the command-line interface"""
     logger = logging.getLogger(f"{__name__}:main")
     args_ns = parse_args(sys.argv[1:])

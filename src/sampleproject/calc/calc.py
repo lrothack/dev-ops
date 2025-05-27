@@ -9,4 +9,4 @@ class Calc:
     @staticmethod
     def add(a: int, b: int) -> int:
         print(a, b)
-        return np.sum([a, b])
+        return int(np.sum([a, b]))

@@ -11,7 +11,7 @@ class LoggerConfig:
     LOGGING_FORMAT = '%(message)s'
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize log config with default level info and a short log
         message (contains just the message and not meta information)
         """
@@ -24,21 +24,21 @@ class LoggerConfig:
         logging.getLogger().addHandler(self.__handler)
         self.info()
 
-    def debug(self):
+    def debug(self) -> None:
         """Switch to debug log level. Change level-of-detail for log message.
         (add meta information)
         """
         logging.getLogger().setLevel(logging.DEBUG)
         self.__handler.setFormatter(logging.Formatter(self.__format_debug))
 
-    def info(self):
+    def info(self) -> None:
         """Switch to info log level. Change level-of-detail for log message.
         (just the log message)
         """
         logging.getLogger().setLevel(logging.INFO)
         self.__handler.setFormatter(logging.Formatter(self.__format_plain))
 
-    def warning(self):
+    def warning(self) -> None:
         """Switch to info log level. Change level-of-detail for log message.
         (just the log message)
         """

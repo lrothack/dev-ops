@@ -24,8 +24,8 @@ COPY . .
 # Docker build fails if unit tests fail
 RUN make clean-all && \
     make install-dev && \
-    (make lint >${REPORTFILE} || exit 0) && \
-    make test >>${REPORTFILE}
+    make check && \
+    make report >${REPORTFILE}
 
 # Use Makefile in order to build a Python wheel from the app
 RUN make clean-all && make build

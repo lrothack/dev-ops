@@ -1,5 +1,4 @@
-"""Extracts project meta information based on command-line interface.
-"""
+"""Extracts project meta information based on command-line interface."""
 
 import sys
 import platform

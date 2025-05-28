@@ -29,7 +29,6 @@ The project contains the following top-level components:
 
 - `README.md` file (this file).
 - [`pyproject.toml`](pyproject.toml) file for defining the app's deployment package (including dependencies).
-- [`LICENSE`](LICENSE) for defining users' rights and obligations.
 - [`src`](src/) directory for project Python sources.
 - [`tests`](tests/) directory for unit tests.
 - [`Makefile`](Makefile) for setting up development environment, building, testing, code quality reporting, deployment (run `make help` for an overview).

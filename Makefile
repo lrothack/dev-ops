@@ -25,12 +25,14 @@ MKFILE_PATH := $(lastword $(MAKEFILE_LIST))
 # Define names of executables used in make targets (and variables)
 PYTHON = python
 PIP = pip
+# META=devopstemplate meta
+META=$(PYTHON) meta.py
 # Files required by `python build` (pip, name/version discovery)
 # Note that building is only supported from the project root
 # --> BUILDTOOLSFILES must be present in the working directory
 # Adjust the list when your configuration changes, e.g., you use additional
 # files one of the files is not used anymore.
-BUILDTOOLSFILES = pyproject.toml meta.py
+BUILDTOOLSFILES = pyproject.toml
 #
 # Directory where sources are located
 SRC=./src
@@ -43,9 +45,9 @@ TESTS=./tests
 # are present *before* executing the shell commands. 
 #
 # Name of the application defined via pyproject.toml
-NAME=$(shell $(PYTHON) meta.py --quiet --egginfo-path=$(SRC) --name)
+NAME=$(shell $(META) --quiet --egginfo-path=$(SRC) --name)
 # Version of the application defined via pyproject.toml
-VERSION=$(shell $(PYTHON) meta.py --quiet --egginfo-path=$(SRC) --version)
+VERSION=$(shell $(META) --quiet --egginfo-path=$(SRC) --version)
 # Directory where metadata for the installed package is found
 EGGINFO=$(SRC)/$(NAME).egg-info
 # Files that contain package metadata, adding SRC*/__init__.py since top-level __init__.py

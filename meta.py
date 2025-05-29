@@ -1,13 +1,13 @@
 """Extracts project meta information based on command-line interface."""
 
-import sys
-import platform
-from typing import Optional, Any
-from types import NoneType
-import importlib.metadata
-import pathlib
 import argparse
+import importlib.metadata
 import logging
+import pathlib
+import platform
+import sys
+from types import NoneType
+from typing import Any, Optional
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 

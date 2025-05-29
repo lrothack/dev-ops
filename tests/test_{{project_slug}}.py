@@ -1,5 +1,6 @@
-import pytest
 from argparse import Namespace
+
+import pytest
 import {{project_slug}}.main
 
 

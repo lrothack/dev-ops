@@ -8,9 +8,10 @@ and by using a single mlflow run with a given experiment name.
 """
 
 import os
-from random import random, randint
-import botocore
+from random import randint, random
+
 import boto3
+import botocore
 import mlflow
 
 

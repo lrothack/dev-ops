@@ -6,8 +6,7 @@ import logging
 import pathlib
 import platform
 import sys
-from types import NoneType
-from typing import Any, Optional
+from typing import Any
 
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
@@ -63,10 +62,10 @@ class OrderedStoreTrueAction(argparse.Action):
         self,
         option_strings: list[str],
         dest: str,
-        nargs: NoneType = None,
-        const: NoneType = None,
-        default: NoneType = None,
-        **kwargs: Optional[str],
+        nargs: int | None = None,
+        const: bool | None = None,
+        default: bool | None = None,
+        **kwargs: Any,
     ) -> None:
         """Arguments are forwarded to super class, after checking for argument usage
         that is compatible with a store_true action.
@@ -95,7 +94,7 @@ class OrderedStoreTrueAction(argparse.Action):
         parser: argparse.ArgumentParser,
         namespace: argparse.Namespace,
         values: Any,
-        option_string: Optional[str] = None,
+        option_string: str | None = None,
     ) -> None:
         """Register the command-line argument in the namespace object.
 
@@ -114,7 +113,7 @@ class OrderedStoreTrueAction(argparse.Action):
         setattr(namespace, self.dest, self.const)
 
 
-def parse_args(args_list: Optional[list[str]]) -> argparse.Namespace:
+def parse_args(args_list: list[str] | None) -> argparse.Namespace:
     """Parse command-line arguments
 
     Parameters
@@ -182,10 +181,10 @@ def distribution_name(egginfo_path: str) -> str:
         If no or more than one Python distribution have been found in the current
         working directory.
     """
-    distribution_name_list = []
+    distribution_name_list: list[str] = []
     search_path = pathlib.Path.cwd() / egginfo_path
     for dist in importlib.metadata.distributions():
-        dist_path = pathlib.Path(dist.locate_file(""))
+        dist_path = pathlib.Path(dist.locate_file(""))  # type: ignore
         LOGGER.debug(dist_path)
         if search_path.resolve() == dist_path.resolve():
             distribution_name_list.append(dist.name)
@@ -197,12 +196,12 @@ def distribution_name(egginfo_path: str) -> str:
     )
 
 
-def distribution_version(_distribution_name) -> str:
+def distribution_version(_distribution_name: str) -> str:
     """Returns the version that is stored along with the give Python distribution."""
     return importlib.metadata.version(_distribution_name)
 
 
-def main(args_list: Optional[list[str]] = None) -> None:
+def main(args_list: list[str] | None = None) -> None:
     """Entry point for the command-line interface"""
     if args_list is None:
         args_list = sys.argv[1:]
@@ -213,7 +212,7 @@ def main(args_list: Optional[list[str]] = None) -> None:
     if args_ns.name or args_ns.version:
         try:
             _distribution_name = distribution_name(args_ns.egginfo_path)
-            lines = []
+            lines: list[str] = []
             for opt_arg in getattr(args_ns, OrderedStoreTrueAction.ARGS_NS_KEY):
                 if opt_arg == "name":
                     lines.append(_distribution_name)

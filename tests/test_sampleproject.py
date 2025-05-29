@@ -1,6 +1,8 @@
-import pytest
 import random
 from argparse import Namespace
+
+import pytest
+
 import sampleproject.main
 
 

@@ -1,19 +1,17 @@
-import sys
-import platform
-import logging
+"""Demonstrates CLI definition and parsing and provides an entry-point for the
+application.
+"""
+
 import argparse
+import logging
+import platform
+import sys
+
 import sampleproject
+from sampleproject.calc import Calc
 
 
-class Calc:
-
-    @staticmethod
-    def add(a, b):
-        print(a, b)
-        return a + b + 1
-
-
-def parse_args(args_list):
+def parse_args(args_list: list[str]) -> argparse.Namespace:
     """Parse command-line arguments
 
     Params:
@@ -36,8 +34,8 @@ def parse_args(args_list):
     parser.add_argument("--verbose", action="store_true", help="Print debug messages")
 
     # Command-line arguments for sampleproject
-    parser.add_argument("smnd1", type=int, help="First summand")
-    parser.add_argument("smnd2", type=int, help="Second summand")
+    parser.add_argument("summand1", type=int, help="First summand")
+    parser.add_argument("summand2", type=int, help="Second summand")
     #
     # Add more command-line arguments and/or sub-commands
     #
@@ -55,14 +53,14 @@ def parse_args(args_list):
     return args_ns
 
 
-def main():
+def main() -> None:
     """Entry point for the command-line interface"""
     logger = logging.getLogger(f"{__name__}:main")
     args_ns = parse_args(sys.argv[1:])
     logger.info(args_ns)
     # Start application according to parsing result in args_ns
-    logger.info("Inputs: %d, %d", args_ns.smnd1, args_ns.smnd2)
-    result_sum = Calc.add(args_ns.smnd1, args_ns.smnd2)
+    logger.info("Inputs: %d, %d", args_ns.summand1, args_ns.summand2)
+    result_sum = Calc.add(args_ns.summand1, args_ns.summand2)
     logger.info("Result: %d", result_sum)
 
 

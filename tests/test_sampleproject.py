@@ -7,8 +7,8 @@ import sampleproject.main
 @pytest.fixture
 def args_ns_ref():
     args_ns = Namespace()
-    args_ns.smnd1 = 2
-    args_ns.smnd2 = 2
+    args_ns.summand1 = 2
+    args_ns.summand2 = 2
     return args_ns
 
 

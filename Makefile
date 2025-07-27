@@ -25,8 +25,8 @@ MKFILE_PATH := $(lastword $(MAKEFILE_LIST))
 # Define names of executables used in make targets (and variables)
 PYTHON = python
 PIP = pip
-META=devopstemplate meta
-# META=$(PYTHON) meta.py
+# META=devopstemplate-meta
+META=$(PYTHON) meta.py
 #
 # Files required by `python build` (pip, name/version discovery)
 # Note that building is only supported from the project root
@@ -124,7 +124,7 @@ SONARSCANNER=$(DOCKER) run \
 
 # --- Common targets ---
 
-.PHONY: help clean clean-all build install-dev test lint report check sonar docker-build docker-tag
+.PHONY: help clean clean-all build install test lint report check sonar docker-build docker-tag
 
 ## 
 ## MAKEFILE for building and testing Python package including
@@ -172,14 +172,14 @@ build: $(BUILDTOOLSFILES)
 	$(PIP) install build
 	$(PYTHON) -m build
 
-## install-dev:  Install development dependencies (based on pyproject.toml)
+## install:  Install development dependencies (based on pyproject.toml)
 ##               (installation within a Python virtual environment is
 ##                recommended)
 ##               (application sources will be symlinked to PYTHONPATH)
-# along with PHONY target `install-dev` the rule generates the $(EGGINFO) directory
+# along with PHONY target `install` the rule generates the $(EGGINFO) directory
 # this distribution specification should be rebuilt whenever any package metadata changes
 # -> an updated $(EGGINFO) is required for successful package name/version discovery
-install-dev $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
+install $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
 	$(PIP) install -e ".[dev]"
 
 ## test:         Run Python unit tests with pytest and coverage analysis
@@ -215,7 +215,7 @@ check: $(SRC) $(TESTS)
 ##                `docker compose -p sonarqube \
 ##                                -f sonarqube/docker-compose.yml up -d`)
 #                (requires code analysis dependencies, 
-#                 intall with `make install-dev`
+#                 intall with `make install`
 #                 ATTENTION: make sure to allocate at least 4GB RAM in the 
 #                 Docker resource configuration when running sonar server 
 #                 and sonar scanner containers simulataneously)

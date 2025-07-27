@@ -41,12 +41,12 @@ An important advantage of packaging your app is that your application sources wi
 
 ```bash
 # installs the package in development mode (package dependencies and development dependencies)
-make install-dev
+make install
 ```
 
 Important:
 
-`make install-dev`:
+`make install`:
 
 ```bash
 pip install -e .[dev]

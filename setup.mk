@@ -41,7 +41,7 @@ BANDITREP=$(REPDIR)/bandit.json
 
 # --- Common targets ---
 
-.PHONY: help clean clean-all dist install-dev test lint
+.PHONY: help clean clean-all dist install test lint
 
 ## 
 ## MAKEFILE for building and testing Python package including
@@ -95,11 +95,11 @@ dist: $(SETUPPY)
 	$(PYTHON) setup.py sdist
 	$(PYTHON) setup.py bdist_wheel
 
-## install-dev:  Install development dependencies (based on setup.py)
+## install:  Install development dependencies (based on setup.py)
 ##               (installation within a Python virtual environment is
 ##                recommended)
 ##               (application sources will be symlinked to PYTHONPATH)
-install-dev: $(SETUPCFG)
+install: $(SETUPCFG)
 	$(PIP) install wheel
 	$(PIP) install pytest pytest-mock coverage bandit pylint autopep8 flake8
 	$(PIP) install -e .

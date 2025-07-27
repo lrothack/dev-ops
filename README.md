@@ -53,7 +53,7 @@ Prerequisites:
 python3 -m venv venv
 source venv/bin/activate
 # install dependencies and symlink sources to PYTHONPATH
-make install-dev
+make install
 # run application
 sampleproject --help
 ```

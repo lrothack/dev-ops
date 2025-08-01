@@ -1,8 +1,6 @@
 # Comments: single '#' for ordinary comments, 
 #           '## ' indicates text for 'help' target 
 #
-# Use only one statement per line and do not mix statements and comments on a
-# single line in order to allow for automatic editing.
 
 # ATTENTION: Running `make <target>` is only supported from the project directory
 #
@@ -56,7 +54,7 @@ EGGINFO=$(SRC)/$(NAME).egg-info
 METADATAFILES = pyproject.toml $(wildcard $(SRC)/*/__init__.py) $(wildcard $(SRC)/*/__about__.py)
 
 
-# --- Linting/Testing configuration ---
+# --- Analyses configuration ---
 #
 # Executables
 PYTEST = pytest
@@ -124,8 +122,6 @@ SONARSCANNER=$(DOCKER) run \
 
 # --- Common targets ---
 
-.PHONY: help clean clean-all build install test lint report check sonar docker-build docker-tag
-
 ## 
 ## MAKEFILE for building and testing Python package including
 ## code analysis and reporting to SonarQube in a dockerized build environment
@@ -137,16 +133,19 @@ SONARSCANNER=$(DOCKER) run \
 
 ## help:         Print this comment-generated help message
 # reads contents of this file and expects that this file is called 'Makefile'
+.PHONY: help
 help: $(MKFILE_PATH)
 	@sed -n 's/^## //p' $(MKFILE_PATH)
 
 ## clean:        Clean up auto-generated files
+.PHONY: clean
 clean:
 	@rm -f $(PYTESTREP) $(COVERAGEREP)
 	@rm -f $(PYLINTREP) $(BANDITREP)
 
 ## clean-all:    Clean up auto-generated files and directories
 ##               (WARNING: do not store user data in auto-generated directories)
+.PHONY: clean-all
 clean-all: clean
 	@rm -rf .coverage .scannerwork
 	@rm -rf .pytest_cache
@@ -168,6 +167,7 @@ $(BUILDTOOLSFILES):
 	$(error "Python packaging files missing in working directory ($@)")
 
 ## build:        Build a Python wheel with `python build` (based on pyproject.toml)
+.PHONY: build
 build: $(BUILDTOOLSFILES)
 	$(PIP) install build
 	$(PYTHON) -m build
@@ -179,15 +179,21 @@ build: $(BUILDTOOLSFILES)
 # along with PHONY target `install` the rule generates the $(EGGINFO) directory
 # this distribution specification should be rebuilt whenever any package metadata changes
 # -> an updated $(EGGINFO) is required for successful package name/version discovery
+.PHONY: install
 install $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
 	$(PIP) install -e ".[dev]"
 
+
+# --- Analyses targets ---
+
 ## test:         Run Python unit tests with pytest and coverage analysis
+.PHONY: test
 test: $(SRC) $(TESTS)
 	@echo "\n\nUnit Tests with Coverage\n------------------------\n"
 	$(PYTEST) --cov=$(SRC) $(TESTS)
 
 ## lint:         Run Python linter (bandit, pylint) and print output to terminal
+.PHONY: lint
 lint: $(SRC)
 	@echo "\n\nBandit Vulnerabilities\n----------------------\n"
 	-$(BANDIT) -r $(SRC)
@@ -195,10 +201,12 @@ lint: $(SRC)
 	$(PYLINT) --output-format=colorized --reports=n --exit-zero $(SRC)
 
 ## report:       Combines test and lint targets in order to create a report
+.PHONY: report
 report: lint test
 
 ## check:        Checks test coverage, black/isort formatting, ruff linting
 ##               and mypy type hints
+.PHONY: check
 check: $(SRC) $(TESTS)
 	$(PYTEST) --cov=$(SRC) --cov-fail-under=80 $(TESTS)
 	$(BLACK) --check $(SRC)
@@ -222,6 +230,7 @@ check: $(SRC) $(TESTS)
 # leading dash (in front of commands, not parameters) ignores error codes,
 # `make` would fail if test case fails or linter reports infos/warnings/errors.
 # check EGGINFO that is required for package NAME discovery
+.PHONY: sonar
 sonar: $(EGGINFO) $(SRC) $(TESTS)
 	@mkdir -p $(REPDIR)
 	-$(BANDIT) -r $(SRC) --format json >$(BANDITREP)
@@ -248,6 +257,7 @@ sonar: $(EGGINFO) $(SRC) $(TESTS)
 # Note: info is parsed and immediately printed by make, echo is executed in a
 # shell as are the other commands in the recipe.
 # check EGGINFO that is required for package NAME discovery
+.PHONY: docker-build
 docker-build: $(EGGINFO) $(DOCKERFILES)
 	$(info Running Docker build in context: ./ )
 	$(info ENTRYPOINT executable: $(DOCKERENTRYPOINTEXEC))
@@ -262,5 +272,6 @@ docker-build: $(EGGINFO) $(DOCKERFILES)
 ## docker-tag:   Tag the 'latest' image created with `make docker-build` with
 ##               the current version that is defined via pyproject.toml
 # check EGGINFO that is required for package NAME and VERSION discovery
+.PHONY: docker-tag
 docker-tag: $(EGGINFO)
 	$(DOCKER) tag $(NAME) $(NAME):$(VERSION)

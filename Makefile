@@ -1,5 +1,5 @@
 # --- Makefile Intro ---
-# Makefile for building and testing Python package including code analyses
+# Makefile for building and testing Python package including code analysis
 #  and reporting to SonarQube in a dockerized build environment
 #
 # Comments: single '#' for ordinary comments, 
@@ -57,7 +57,7 @@ EGGINFO=$(SRC)/$(NAME).egg-info
 METADATAFILES = pyproject.toml $(wildcard $(SRC)/*/__init__.py) $(wildcard $(SRC)/*/__about__.py)
 
 
-# --- Analyses configuration ---
+# --- Analysis configuration ---
 #
 # Executables
 PYTEST = pytest
@@ -126,7 +126,7 @@ SONARSCANNER=$(DOCKER) run \
 # --- Common targets ---
 
 ## 
-## MAKEFILE for building and testing Python package including code analyses
+## MAKEFILE for building and testing Python package including code analysis
 ## 
 ## ATTENTION: Running `make <target>` is only supported from the project directory
 ## 
@@ -186,7 +186,7 @@ install $(EGGINFO): $(BUILDTOOLSFILES) $(METADATAFILES)
 	$(PIP) install -e ".[dev]"
 
 
-# --- Analyses targets ---
+# --- Analysis targets ---
 
 ## test:         Run Python unit tests with pytest and coverage analysis
 .PHONY: test

@@ -1,9 +1,12 @@
+# --- Makefile Intro ---
+# Makefile for building and testing Python package including code analyses
+#  and reporting to SonarQube in a dockerized build environment
+#
 # Comments: single '#' for ordinary comments, 
 #           '## ' indicates text for 'help' target 
 #
-
 # ATTENTION: Running `make <target>` is only supported from the project directory
-#
+
 
 # --- Common ---
 #
@@ -123,8 +126,7 @@ SONARSCANNER=$(DOCKER) run \
 # --- Common targets ---
 
 ## 
-## MAKEFILE for building and testing Python package including
-## code analysis and reporting to SonarQube in a dockerized build environment
+## MAKEFILE for building and testing Python package including code analyses
 ## 
 ## ATTENTION: Running `make <target>` is only supported from the project directory
 ## 
@@ -213,7 +215,6 @@ check: $(SRC) $(TESTS)
 	$(RUFF) check $(SRC)
 	$(MYPY) --strict $(SRC)
 	$(ISORT) --check $(SRC)
-
 
 
 # --- SonarQube targets ---

@@ -3,11 +3,9 @@ requires = ["setuptools >= 61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-# Name of the project / library
-# Typically, the name of the top-level import package (directory) is the slug of the
-# project name, see Makefile variable NAME.
-name = "sampleproject"
-authors = [{ name = "UNKNOWN" }]
+name = "{{project_slug}}"
+description = "{{project_description}}"
+authors = [{ name = "{{author_name}}", email = "{{author_email}}" }]
 requires-python = ">=3.12"
 license = "MIT"
 classifiers = [
@@ -18,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
-dependencies = ["numpy"]
+dependencies = []
 
 # Fields that will be loaded dynamically from files or code
 dynamic = ["version", "readme"]
@@ -37,10 +35,10 @@ dev = [
 ]
 
 [project.scripts]
-sampleproject = "sampleproject.main:main"
+sampleproject = "{{project_slug}}.main:main"
 
 [project.urls]
-Homepage = "https://example.com"
+Homepage = "{{project_url}}"
 #Documentation = "https://readthedocs.org"
 #Repository = "https://github.com/me/spam.git"
 #"Bug Tracker" = "https://github.com/me/spam/issues"
@@ -52,7 +50,7 @@ where = ["src"]
 
 [tool.setuptools.dynamic]
 # The version string will be included in your Python package
-version = { attr = "sampleproject.__version__" }
+version = { attr = "{{project_slug}}.__version__" }
 # Long description of the package
 readme = { file = "README.md", content-type = "text/markdown" }
 

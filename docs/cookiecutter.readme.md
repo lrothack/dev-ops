@@ -1,0 +1,51 @@
+# Cookiecutter PyDevops
+
+Cookiecutter template for a dockerized dev-ops pipeline with SonarQube code-quality monitoring.
+[Cookiecutter](https://github.com/audreyr/cookiecutter) provides a command-line interface for creating projects from templates.
+
+- [Sample project](https://github.com/lrothack/dev-ops) for this cookiecutter (including detailed documentation).
+- This cookiecutter has been generated with the command-line client [devopstemplate](https://github.com/lrothack/dev-ops-admin).
+- Also check out [audreyr/cookiecutter-pypackage](https://github.com/audreyr/cookiecutter-pypackage) for additional Python package templates.
+
+## Features
+
+The template provides a minimal dev-ops pipeline that supports:
+
+- code analysis including [pylint](https://www.pylint.org/), [bandit](https://bandit.readthedocs.io/en/latest/), [pytest](https://docs.pytest.org/en/stable/), [coverage](https://coverage.readthedocs.io/en/latest/) and [mypy](https://mypy.readthedocs.io/en/stable/).
+- testing and deployment in a multi-stage [Docker](https://www.docker.com) environment.
+- Python [packaging](https://packaging.python.org/en/latest/flow/)
+- code quality monitoring with [SonarQube](https://www.sonarqube.org).
+
+The dev-ops pipeline is mostly implemented in a `Makefile` and a `Dockerfile` which are
+independent of your Python code.
+
+## Quickstart
+
+Install the latest cookiecutter:
+
+```bash
+pip install -U cookiecutter
+```
+
+Generate an instance of the template:
+
+```bash
+cookiecutter https://github.com/lrothack/cookiecutter-pydevops.git
+```
+
+Then switch to the project directory and:
+
+- Set up a virtual environment for your project and activate it (requires Python >= 3.6).
+- Run `make help` in order to get an overview of the targets provided by `Makefile`.
+- Run `make install` in order to install the package (and all dependencies) in development mode.
+- Run `make lint` in order to run code analysis with pylint and bandit.
+- Run `make test` in order to run unit tests with pytest and coverage.
+- Run `make report` in order to run `lint` and `test` targets.
+- Run `make format` in order to run code formatters (black and isort).
+- Run `make check` in order to run code quality analyses including linting, testing, formatting and static type analysis.
+- Run `make build` in order to build a Python package (binary and source).
+- Run `docker-compose -p sonarqube -f sonarqube/docker-compose.yml up -d` in order to start a SonarQube server.
+- Run `make sonar` in order to run `sonar-scanner` and report results to your local SonarQube server. Make sure to create a SonarQube authentication token before. Save the token in the file `.sonartoken` within your project directory.
+- Run `make docker-build` in order to analyze, test, package and deploy in a multi-stage Docker build. Test your docker image with `docker run`.
+
+Advanced configurations can be made in the *configuration* sections of `Makefile`. See [lrothack/dev-ops](https://github.com/lrothack/dev-ops) for more information.

@@ -211,6 +211,12 @@ lint: $(SRC)
 .PHONY: report
 report: lint test
 
+## format:       Runs code formatters (black, isort) on source files
+.PHONY: format
+format: $(SRC)
+	$(BLACK) $(SRC)
+	$(ISORT) $(SRC)
+
 ## check:        Checks test coverage, black/isort formatting, ruff linting
 ##               and mypy type hints
 .PHONY: check
